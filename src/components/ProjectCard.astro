@@ -1,0 +1,335 @@
+---
+import { Bed, Building2, Ruler, MapPin } from 'lucide-astro';
+import type { Project, Company } from '../types/index';
+
+interface Props {
+  project: Project;
+  company?: Company;
+}
+
+const { project, company } = Astro.props;
+
+const etapaLabelMap: Record<string, string> = {
+  en_planos: 'En planos',
+  en_construccion: 'En construcción',
+  entrega_inmediata: 'Entrega inmediata'
+};
+
+const etapaTexto = project.etapa ? etapaLabelMap[project.etapa] : null;
+const fechaTexto = project.fechaEntrega ? project.fechaEntrega.texto : null;
+const etapaFechaBadge = [etapaTexto, fechaTexto].filter(Boolean).join(' | ');
+
+const precioFormateado = project.precioMin 
+  ? new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 }).format(project.precioMin)
+  : null;
+
+const tieneHabitaciones = project.habitaciones && project.habitaciones.length > 0;
+const tipologiaTexto = project.tipologia && project.tipologia.length > 0 ? project.tipologia.join(', ') : null;
+
+// Áreas
+const areaTexto = project.areaMin
+  ? (project.areaMax && project.areaMax > project.areaMin
+      ? `Desde ${project.areaMin} - ${project.areaMax} m²`
+      : `Desde ${project.areaMin} m²`)
+  : (project.areaMax ? `Hasta ${project.areaMax} m²` : null);
+
+const dataHabitaciones = tieneHabitaciones ? project.habitaciones.join(',') : '0';
+const dataAnio = project.fechaEntrega ? project.fechaEntrega.anio : (project.etapa === 'entrega_inmediata' ? '0' : '');
+
+const dataEntregaOrden = project.etapa === 'entrega_inmediata'
+  ? 0
+  : (project.fechaEntrega 
+      ? (project.fechaEntrega.anio * 10 + (project.fechaEntrega.trimestre || 4))
+      : 99999);
+---
+
+<a 
+  href={`/proyectos/${project.slug}`} 
+  class="project-card"
+  data-nombre={project.nombre.toLowerCase()}
+  data-distrito={project.distrito.toLowerCase()}
+  data-empresa={project.empresaId.toLowerCase()}
+  data-etapa={project.etapa || ''}
+  data-habitaciones={dataHabitaciones}
+  data-precio={project.precioMin || 0}
+  data-anio={dataAnio}
+  data-entrega-orden={dataEntregaOrden}
+>
+  <div class="image-wrapper">
+    <img 
+      src={project.imagen} 
+      alt={project.nombre}
+      loading="lazy"
+      class="project-image"
+      onerror="this.onerror=null; this.src='/images/projects/default.webp';"
+    />
+
+    <div class="company-logo-badge">
+      <img 
+        src={company?.logo || `/images/companies/${project.empresaId.toLowerCase()}.webp`} 
+        alt={company?.nombre || 'Constructora'}
+        onerror="this.onerror=null; this.src='/images/companies/default.webp';"
+      />
+    </div>
+
+    {etapaFechaBadge && (
+      <div class="desktop-image-overlay">
+        <span>{etapaFechaBadge}</span>
+      </div>
+    )}
+  </div>
+
+  <div class="card-info">
+    {etapaFechaBadge && (
+      <p class="mobile-etapa-tag">{etapaFechaBadge}</p>
+    )}
+
+    <h2 class="project-name">{project.nombre}</h2>
+
+    <p class="project-district">
+      <span>{project.distrito}</span>
+      <MapPin size={15} class="inline-icon" />
+    </p>
+
+    {project.direccion && (
+      <p class="project-address">{project.direccion}</p>
+    )}
+
+    <div class="project-specs">
+      {tieneHabitaciones ? (
+        <span class="spec-item">
+          <Bed size={15} class="spec-icon" /> {project.habitaciones.join(', ')} hab.
+        </span>
+      ) : (
+        tipologiaTexto && (
+          <span class="spec-item">
+            <Building2 size={15} class="spec-icon" /> {tipologiaTexto}
+          </span>
+        )
+      )}
+
+      {(tieneHabitaciones || tipologiaTexto) && areaTexto && <span class="spec-dot">·</span>}
+
+      {areaTexto && (
+        <span class="spec-item">
+          <Ruler size={15} class="spec-icon" /> {areaTexto}
+        </span>
+      )}
+    </div>
+
+    {precioFormateado && (
+      <div class="price-container">
+        <span class="price-label">Desde</span>
+        <span class="price-value">{precioFormateado}</span>
+      </div>
+    )}
+  </div>
+</a>
+
+<style>
+  .project-card {
+    display: flex;
+    flex-direction: row;
+    background-color: var(--color-surface);
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px var(--color-text-main);
+  }
+
+  .image-wrapper {
+    position: relative;
+    width: 120px;
+    flex-shrink: 0;
+    background-color: #e2e8f0;
+    overflow: hidden;
+  }
+
+  .project-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 3 / 4;
+    transition: transform 0.3s ease;
+  }
+
+  .project-card:hover .project-image {
+    transform: scale(1.05);
+  }
+
+  .company-logo-badge,
+  .desktop-image-overlay {
+    display: none;
+  }
+
+  .card-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .mobile-etapa-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--color-remax-blue);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  .project-name {
+    font-size: 1.0625rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+    text-align: left;
+    line-height: 1.25;
+    margin-bottom: 0.35rem;
+  }
+
+  .project-district {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #0f172a;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    text-align: left;
+  }
+
+  .inline-icon {
+    color: var(--color-remax-blue);
+    flex-shrink: 0;
+  }
+
+  .project-address {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    text-align: left;
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .project-specs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-top: auto;
+    margin-bottom: 0.35rem;
+  }
+
+  .spec-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .spec-icon {
+    color: var(--color-remax-blue);
+    flex-shrink: 0;
+  }
+
+  .spec-dot {
+    font-weight: 700;
+  }
+
+  .price-container {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    padding-top: 0.25rem;
+    border-top: 1px dashed #e2e8f0;
+  }
+
+  .price-label {
+    font-size: 0.77rem;
+    color: var(--color-text-muted);
+  }
+
+  .price-value {
+    font-size: 1.17rem;
+    font-weight: 900;
+    color: #0f172a;
+  }
+
+  @media (min-width: 1024px) {
+    .project-card {
+      flex-direction: column;
+    }
+
+    .image-wrapper {
+      width: 100%;
+    }
+
+    .project-image {
+      aspect-ratio: 1 / 1;
+    }
+
+    .company-logo-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 52px;
+      height: 52px;
+      background-color: #ffffff;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 4px;
+      z-index: 2;
+    }
+
+    .company-logo-badge img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .desktop-image-overlay {
+      display: block;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+      padding: 1.5rem 0.75rem 0.5rem;
+      color: #ffffff;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .mobile-etapa-tag {
+      display: none;
+    }
+
+    .card-info {
+      padding: 1.25rem;
+    }
+
+    .project-name {
+      font-size: 1.22rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .price-value {
+      font-size: 1.37rem;
+    }
+  }
+</style>

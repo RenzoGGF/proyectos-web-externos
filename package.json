@@ -1,0 +1,25 @@
+{
+  "name": "proyectos-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "data:import": "tsx scripts/import-excel.ts"
+  },
+  "dependencies": {
+    "astro": "^7.2.9",
+    "lucide-astro": "^0.556.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0",
+    "xlsx": "^0.18.5",
+    "zod": "^3.23.0"
+  }
+}

@@ -1,0 +1,585 @@
+---
+import { SearchX, ArrowUp } from 'lucide-astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import FilterBar from '../components/FilterBar.astro';
+
+import projectsData from '../data/projects.json';
+import companiesData from '../data/companies.json';
+import type { Project, Company } from '../types/index';
+
+const projects = projectsData as Project[];
+const companies = companiesData as Company[];
+
+const companiesMap = new Map<string, Company>(companies.map((c) => [c.id, c]));
+
+const activeProjects = projects.filter((p) => p.estado === 'activo');
+activeProjects.sort((a, b) => a.distrito.localeCompare(b.distrito, 'es', { sensitivity: 'base' }));
+
+const distritosUnicos = Array.from(new Set(activeProjects.map((p) => p.distrito))).sort((a, b) => 
+  a.localeCompare(b, 'es', { sensitivity: 'base' })
+);
+
+const activeCompanyIds = new Set(activeProjects.map((p) => p.empresaId));
+const companiesSorted = companies
+  .filter((c) => activeCompanyIds.has(c.id))
+  .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
+
+const aniosUnicos = Array.from(
+  new Set(activeProjects.map((p) => p.fechaEntrega?.anio).filter((a): a is number => typeof a === 'number'))
+).sort((a, b) => a - b);
+---
+
+<BaseLayout title="Remax Family Proyectos">
+  <Header />
+
+  <main class="container page-main">
+    <div class="catalog-layout">
+      <FilterBar 
+        distritos={distritosUnicos} 
+        aniosEntrega={aniosUnicos} 
+        companies={companiesSorted} 
+      />
+
+      <section class="catalog-content">
+        <div class="results-toolbar">
+          <div class="results-header-left">
+            <h2 class="results-title">
+              Proyectos disponibles 
+              <span id="results-count" class="results-badge">{activeProjects.length}</span>
+            </h2>
+          </div>
+
+          <div class="sort-control">
+            <label for="sort-select" class="sort-label">Ordenar por:</label>
+            <select id="sort-select" class="sort-select">
+              <option value="distrito-asc">Distrito (A - Z)</option>
+              <option value="precio-asc">Menor precio</option>
+              <option value="precio-desc">Mayor precio</option>
+              <option value="entrega-asc">Entrega más próxima</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="active-chips-container" class="chips-container hidden">
+          <span class="chips-label">Filtros activos:</span>
+          <div id="chips-list" class="chips-list"></div>
+        </div>
+
+        <!-- ESTADO SIN RESULTADOS CON ICONO LUCIDE -->
+        <div id="no-results" class="no-results hidden">
+          <div class="no-results-box">
+            <SearchX size={44} class="no-results-icon" stroke-width={1.5} />
+            <h3 class="no-results-title">No encontramos proyectos con esos filtros.</h3>
+            <button type="button" id="btn-no-results-reset" class="btn-empty-reset">
+              Limpiar filtros
+            </button>
+          </div>
+        </div>
+
+        <div class="projects-grid" id="projects-grid">
+          {activeProjects.map((project) => (
+            <ProjectCard 
+              project={project} 
+              company={companiesMap.get(project.empresaId)} 
+            />
+          ))}
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- BOTÓN VOLVER ARRIBA CON ARROW-UP -->
+  <button type="button" id="btn-back-to-top" class="back-to-top-btn hidden" aria-label="Volver arriba">
+    <ArrowUp size={16} stroke-width={2.5} />
+    <span>Volver arriba</span>
+  </button>
+</BaseLayout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('header-search-input') as HTMLInputElement | null;
+    const searchForm = document.querySelector('.header-search-form') as HTMLFormElement | null;
+
+    const distritoSelect = document.getElementById('filter-distrito') as HTMLSelectElement | null;
+    const empresaSelect = document.getElementById('filter-empresa') as HTMLSelectElement | null;
+    const etapaSelect = document.getElementById('filter-etapa') as HTMLSelectElement | null;
+    const precioMinInput = document.getElementById('filter-precio-min') as HTMLInputElement | null;
+    const precioMaxInput = document.getElementById('filter-precio-max') as HTMLInputElement | null;
+    const anioMinSelect = document.getElementById('filter-anio-min') as HTMLSelectElement | null;
+    const anioMaxSelect = document.getElementById('filter-anio-max') as HTMLSelectElement | null;
+    const roomCheckboxes = document.querySelectorAll<HTMLInputElement>('input[name="filter-rooms"]');
+    const sortSelect = document.getElementById('sort-select') as HTMLSelectElement | null;
+
+    const btnReset = document.getElementById('btn-reset-filters');
+    const btnNoResultsReset = document.getElementById('btn-no-results-reset');
+
+    const gridContainer = document.getElementById('projects-grid');
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('.project-card'));
+    const resultsCountEl = document.getElementById('results-count');
+    const noResultsEl = document.getElementById('no-results');
+    const chipsContainer = document.getElementById('active-chips-container');
+    const chipsList = document.getElementById('chips-list');
+    const btnBackToTop = document.getElementById('btn-back-to-top');
+
+    const CURRENT_YEAR = new Date().getFullYear();
+
+    // 1. Prevenir submit recargando página si ya estamos en el catálogo
+    searchForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      applyFiltersAndSort();
+    });
+
+    // 2. Cargar parámetro ?q= desde la URL (si vino redirigido)
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialQuery = urlParams.get('q');
+    if (initialQuery && searchInput) {
+      searchInput.value = initialQuery;
+    }
+
+    function updateActiveChips() {
+      if (!chipsContainer || !chipsList) return;
+      chipsList.innerHTML = '';
+      const chips: { label: string; clear: () => void }[] = [];
+
+      // Chip de búsqueda por texto
+      if (searchInput?.value.trim()) {
+        chips.push({
+          label: `Búsqueda: "${searchInput.value.trim()}"`,
+          clear: () => { searchInput.value = ''; applyFiltersAndSort(); }
+        });
+      }
+
+      if (distritoSelect?.value) {
+        const text = distritoSelect.options[distritoSelect.selectedIndex].text;
+        chips.push({
+          label: `Distrito: ${text}`,
+          clear: () => { distritoSelect.value = ''; applyFiltersAndSort(); }
+        });
+      }
+
+      if (empresaSelect?.value) {
+        const text = empresaSelect.options[empresaSelect.selectedIndex].text;
+        chips.push({
+          label: `Empresa: ${text}`,
+          clear: () => { empresaSelect.value = ''; applyFiltersAndSort(); }
+        });
+      }
+
+      if (etapaSelect?.value) {
+        const text = etapaSelect.options[etapaSelect.selectedIndex].text;
+        chips.push({
+          label: `Etapa: ${text}`,
+          clear: () => { etapaSelect.value = ''; applyFiltersAndSort(); }
+        });
+      }
+
+      if (precioMinInput?.value) {
+        chips.push({
+          label: `Desde S/ ${Number(precioMinInput.value).toLocaleString('es-PE')}`,
+          clear: () => { precioMinInput.value = ''; applyFiltersAndSort(); }
+        });
+      }
+
+      if (precioMaxInput?.value) {
+        chips.push({
+          label: `Hasta S/ ${Number(precioMaxInput.value).toLocaleString('es-PE')}`,
+          clear: () => { precioMaxInput.value = ''; applyFiltersAndSort(); }
+        });
+      }
+
+      if (anioMinSelect?.value) {
+        chips.push({
+          label: `Entrega desde: ${anioMinSelect.value}`,
+          clear: () => { anioMinSelect.value = ''; applyFiltersAndSort(); }
+        });
+      }
+
+      if (anioMaxSelect?.value) {
+        chips.push({
+          label: `Entrega hasta: ${anioMaxSelect.value}`,
+          clear: () => { anioMaxSelect.value = ''; applyFiltersAndSort(); }
+        });
+      }
+
+      roomCheckboxes.forEach((cb) => {
+        if (cb.checked) {
+          const labelText = cb.value === '0' ? 'Oficina/Otros' : (cb.value === '4' ? '4+ hab' : `${cb.value} hab`);
+          chips.push({
+            label: labelText,
+            clear: () => { cb.checked = false; applyFiltersAndSort(); }
+          });
+        }
+      });
+
+      if (chips.length > 0) {
+        chipsContainer.classList.remove('hidden');
+        chips.forEach((chip) => {
+          const chipEl = document.createElement('button');
+          chipEl.type = 'button';
+          chipEl.className = 'filter-chip';
+          chipEl.innerHTML = `<span>${chip.label}</span> <span class="chip-remove">✕</span>`;
+          chipEl.addEventListener('click', chip.clear);
+          chipsList.appendChild(chipEl);
+        });
+      } else {
+        chipsContainer.classList.add('hidden');
+      }
+    }
+
+    function sortCards(cardsArray: HTMLElement[]) {
+      const sortMode = sortSelect?.value || 'distrito-asc';
+
+      return cardsArray.sort((a, b) => {
+        const distritoA = (a.dataset.distrito || '').toLowerCase();
+        const distritoB = (b.dataset.distrito || '').toLowerCase();
+        const precioA = parseFloat(a.dataset.precio || '0');
+        const precioB = parseFloat(b.dataset.precio || '0');
+        const entregaA = parseInt(a.dataset.entregaOrden || '99999', 10);
+        const entregaB = parseInt(b.dataset.entregaOrden || '99999', 10);
+
+        if (sortMode === 'precio-asc') {
+          const pA = precioA > 0 ? precioA : Infinity;
+          const pB = precioB > 0 ? precioB : Infinity;
+          return pA - pB;
+        }
+
+        if (sortMode === 'precio-desc') {
+          return precioB - precioA;
+        }
+
+        if (sortMode === 'entrega-asc') {
+          if (entregaA !== entregaB) {
+            return entregaA - entregaB;
+          }
+          return distritoA.localeCompare(distritoB, 'es', { sensitivity: 'base' });
+        }
+
+        return distritoA.localeCompare(distritoB, 'es', { sensitivity: 'base' });
+      });
+    }
+
+    function applyFiltersAndSort() {
+      const searchVal = (searchInput?.value || '').trim().toLowerCase();
+      const distritoVal = distritoSelect?.value.toLowerCase() || '';
+      const empresaVal = empresaSelect?.value.toLowerCase() || '';
+      const etapaVal = etapaSelect?.value || '';
+      const precioMinVal = precioMinInput?.value ? parseFloat(precioMinInput.value) : null;
+      const precioMaxVal = precioMaxInput?.value ? parseFloat(precioMaxInput.value) : null;
+      const anioMinVal = anioMinSelect?.value ? parseInt(anioMinSelect.value, 10) : null;
+      const anioMaxSelectVal = anioMaxSelect?.value ? parseInt(anioMaxSelect.value, 10) : null;
+
+      const selectedRooms: string[] = [];
+      roomCheckboxes.forEach((cb) => {
+        if (cb.checked) selectedRooms.push(cb.value);
+      });
+
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const cardNombre = (card.dataset.nombre || '').toLowerCase();
+        const cardDistrito = card.dataset.distrito || '';
+        const cardEmpresa = card.dataset.empresa || '';
+        const cardEtapa = card.dataset.etapa || '';
+        const cardPrecio = parseFloat(card.dataset.precio || '0');
+        const cardAnio = parseInt(card.dataset.anio || '0', 10);
+        
+        const cardHabitaciones = (card.dataset.habitaciones || '')
+          .split(',')
+          .map((n) => parseInt(n, 10))
+          .filter((n) => !isNaN(n));
+
+        // Filtro por Nombre
+        const matchesNombre = !searchVal || cardNombre.includes(searchVal);
+
+        const matchesDistrito = !distritoVal || cardDistrito === distritoVal;
+        const matchesEmpresa = !empresaVal || cardEmpresa === empresaVal;
+        const matchesEtapa = !etapaVal || cardEtapa === etapaVal;
+
+        const matchesPrecioMin = !precioMinVal || (cardPrecio > 0 && cardPrecio >= precioMinVal);
+        const matchesPrecioMax = !precioMaxVal || (cardPrecio > 0 && cardPrecio <= precioMaxVal);
+        const matchesPrecio = matchesPrecioMin && matchesPrecioMax;
+
+        let matchesAnioMin = true;
+        let matchesAnioMax = true;
+        if (cardAnio === 0) {
+          matchesAnioMin = !anioMinVal || anioMinVal <= CURRENT_YEAR;
+          matchesAnioMax = true;
+        } else {
+          matchesAnioMin = !anioMinVal || cardAnio >= anioMinVal;
+          matchesAnioMax = !anioMaxSelectVal || cardAnio <= anioMaxSelectVal;
+        }
+        const matchesAnio = matchesAnioMin && matchesAnioMax;
+
+        let matchesHabitaciones = true;
+        if (selectedRooms.length > 0) {
+          matchesHabitaciones = selectedRooms.some((val) => {
+            if (val === '0') return cardHabitaciones.includes(0) || cardHabitaciones.length === 0;
+            const num = parseInt(val, 10);
+            if (num === 4) return cardHabitaciones.some((h) => h >= 4);
+            return cardHabitaciones.includes(num);
+          });
+        }
+
+        const isVisible = matchesNombre && matchesDistrito && matchesEmpresa && matchesEtapa && matchesPrecio && matchesAnio && matchesHabitaciones;
+
+        if (isVisible) {
+          card.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      const sortedCards = sortCards([...cards]);
+      if (gridContainer) {
+        sortedCards.forEach((card) => gridContainer.appendChild(card));
+      }
+
+      if (resultsCountEl) resultsCountEl.textContent = String(visibleCount);
+
+      if (noResultsEl) {
+        if (visibleCount === 0) {
+          noResultsEl.classList.remove('hidden');
+        } else {
+          noResultsEl.classList.add('hidden');
+        }
+      }
+
+      updateActiveChips();
+    }
+
+    function resetAllFilters() {
+      if (searchInput) searchInput.value = '';
+      if (distritoSelect) distritoSelect.value = '';
+      if (empresaSelect) empresaSelect.value = '';
+      if (etapaSelect) etapaSelect.value = '';
+      if (precioMinInput) precioMinInput.value = '';
+      if (precioMaxInput) precioMaxInput.value = '';
+      if (anioMinSelect) anioMinSelect.value = '';
+      if (anioMaxSelect) anioMaxSelect.value = '';
+      if (sortSelect) sortSelect.value = 'distrito-asc';
+      roomCheckboxes.forEach((cb) => (cb.checked = false));
+      
+      // Limpiar URL param si existe
+      if (window.location.search) {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+      
+      applyFiltersAndSort();
+    }
+
+    // Listener de búsqueda en tiempo real
+    searchInput?.addEventListener('input', applyFiltersAndSort);
+
+    distritoSelect?.addEventListener('change', applyFiltersAndSort);
+    empresaSelect?.addEventListener('change', applyFiltersAndSort);
+    etapaSelect?.addEventListener('change', applyFiltersAndSort);
+    precioMinInput?.addEventListener('input', applyFiltersAndSort);
+    precioMaxInput?.addEventListener('input', applyFiltersAndSort);
+    anioMinSelect?.addEventListener('change', applyFiltersAndSort);
+    anioMaxSelect?.addEventListener('change', applyFiltersAndSort);
+    roomCheckboxes.forEach((cb) => cb.addEventListener('change', applyFiltersAndSort));
+    sortSelect?.addEventListener('change', applyFiltersAndSort);
+
+    btnReset?.addEventListener('click', resetAllFilters);
+    btnNoResultsReset?.addEventListener('click', resetAllFilters);
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 250) {
+        btnBackToTop?.classList.remove('hidden');
+      } else {
+        btnBackToTop?.classList.add('hidden');
+      }
+    });
+
+    btnBackToTop?.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Ejecutar filtro inicial por si venía con ?q=
+    if (initialQuery) {
+      applyFiltersAndSort();
+    }
+  });
+</script>
+
+<style>
+  .page-main {
+    padding-top: 1.5rem;
+    padding-bottom: 5rem;
+  }
+
+  .catalog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .results-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  @media (min-width: 640px) {
+    .results-toolbar {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+
+  .results-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .results-badge {
+    background-color: var(--color-remax-blue);
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.15rem 0.55rem;
+    border-radius: 9999px;
+  }
+
+  .sort-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .sort-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+  }
+
+  .sort-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    background-size: 0.9rem;
+    padding: 0.4rem 2rem 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .sort-select:focus {
+    border-color: var(--color-remax-blue);
+    box-shadow: 0 0 0 3px rgba(0, 61, 165, 0.12);
+  }
+
+  .chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  .chips-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+  }
+
+  .chips-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  :global(.filter-chip) {
+    background-color: #eff6ff;
+    color: var(--color-remax-blue);
+    border: 1px solid #bfdbfe;
+    border-radius: 9999px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  :global(.filter-chip:hover) {
+    background-color: #fee2e2;
+    color: var(--color-remax-red);
+    border-color: #fca5a5;
+  }
+
+  :global(.chip-remove) {
+    font-size: 0.7rem;
+    font-weight: 900;
+  }
+
+  .no-results {
+    padding: 4rem 1.5rem;
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .no-results-box {
+    max-width: 450px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .no-results-icon {
+    color: var(--color-text-muted);
+  }
+
+  .no-results-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+  }
+
+  .btn-empty-reset {
+    background-color: var(--color-remax-red);
+    color: #ffffff;
+    border: none;
+    padding: 0.65rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(220, 28, 46, 0.25);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .btn-empty-reset:hover {
+    background-color: #b91c1c;
+    transform: translateY(-2px);
+  }
+</style>

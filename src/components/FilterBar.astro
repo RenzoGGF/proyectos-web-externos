@@ -1,0 +1,315 @@
+---
+import { SlidersHorizontal, ChevronDown, RotateCcw } from 'lucide-astro';
+import type { Company } from '../types/index';
+
+interface Props {
+  distritos: string[];
+  aniosEntrega: number[];
+  companies: Company[];
+}
+
+const { distritos, aniosEntrega, companies } = Astro.props;
+---
+
+<aside class="filter-sidebar">
+  <div class="filter-container">
+    <div class="filter-bar-header">
+      <button type="button" id="btn-toggle-filters" class="toggle-btn" aria-expanded="true">
+        <SlidersHorizontal size={16} />
+        <span class="btn-text">Filtros de Búsqueda</span>
+        <ChevronDown size={16} class="toggle-icon" id="toggle-icon" />
+      </button>
+
+      <button type="button" id="btn-reset-filters" class="btn-reset">
+        <RotateCcw size={13} />
+        <span>Limpiar</span>
+      </button>
+    </div>
+
+    <div id="filter-content" class="filter-content">
+      <div class="filter-stack">
+        <!-- 1. Distrito -->
+        <div class="filter-group">
+          <label for="filter-distrito" class="filter-label">Distrito</label>
+          <select id="filter-distrito" class="filter-select">
+            <option value="">Todos los distritos</option>
+            {distritos.map((d) => (
+              <option value={d.toLowerCase()}>{d}</option>
+            ))}
+          </select>
+        </div>
+
+        <!-- 2. Empresa / Constructora -->
+        <div class="filter-group">
+          <label for="filter-empresa" class="filter-label">Empresa / Constructora</label>
+          <select id="filter-empresa" class="filter-select">
+            <option value="">Todas las empresas</option>
+            {companies.map((c) => (
+              <option value={c.id.toLowerCase()}>{c.nombre}</option>
+            ))}
+          </select>
+        </div>
+
+        <!-- 3. Etapa -->
+        <div class="filter-group">
+          <label for="filter-etapa" class="filter-label">Etapa</label>
+          <select id="filter-etapa" class="filter-select">
+            <option value="">Todas las etapas</option>
+            <option value="en_planos">En planos</option>
+            <option value="en_construccion">En construcción</option>
+            <option value="entrega_inmediata">Entrega inmediata</option>
+          </select>
+        </div>
+
+        <!-- 4. Rango de Precios -->
+        <div class="filter-group">
+          <label class="filter-label">Precio (S/)</label>
+          <div class="range-inputs">
+            <input type="number" id="filter-precio-min" class="filter-input" placeholder="Mínimo" step="10000" min="0" />
+            <span class="range-separator">-</span>
+            <input type="number" id="filter-precio-max" class="filter-input" placeholder="Máximo" step="10000" min="0" />
+          </div>
+        </div>
+
+        <!-- 5. Rango de Entrega -->
+        <div class="filter-group">
+          <label class="filter-label">Año de Entrega</label>
+          <div class="range-inputs">
+            <select id="filter-anio-min" class="filter-select">
+              <option value="">Desde</option>
+              {aniosEntrega.map((a) => (
+                <option value={a}>{a}</option>
+              ))}
+            </select>
+            <span class="range-separator">-</span>
+            <select id="filter-anio-max" class="filter-select">
+              <option value="">Hasta</option>
+              {aniosEntrega.map((a) => (
+                <option value={a}>{a}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <!-- 6. Habitaciones / Espacio -->
+        <div class="filter-group-rooms">
+          <span class="filter-label">Habitaciones / Espacio</span>
+          <div class="checkbox-stack">
+            {[1, 2, 3, 4].map((num) => (
+              <label class="checkbox-label">
+                <input type="checkbox" name="filter-rooms" value={num} class="filter-checkbox" />
+                <span>{num === 4 ? '4 a más habitaciones' : `${num} ${num === 1 ? 'habitación' : 'habitaciones'}`}</span>
+              </label>
+            ))}
+            <label class="checkbox-label">
+              <input type="checkbox" name="filter-rooms" value="0" class="filter-checkbox" />
+              <span>Oficina / Local / Otros</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const btnToggle = document.getElementById('btn-toggle-filters');
+    const filterContent = document.getElementById('filter-content');
+    const toggleIcon = document.getElementById('toggle-icon');
+
+    // Colapsar en móvil por defecto
+    const isMobile = window.innerWidth < 1024;
+    if (isMobile && filterContent && toggleIcon && btnToggle) {
+      filterContent.classList.add('is-collapsed');
+      toggleIcon.classList.add('is-rotated');
+      btnToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    btnToggle?.addEventListener('click', () => {
+      if (filterContent && toggleIcon) {
+        const isCollapsed = filterContent.classList.toggle('is-collapsed');
+        toggleIcon.classList.toggle('is-rotated', isCollapsed);
+        btnToggle.setAttribute('aria-expanded', String(!isCollapsed));
+      }
+    });
+  });
+</script>
+
+<style>
+  .filter-sidebar {
+    width: 100%;
+  }
+
+  @media (min-width: 1024px) {
+    .filter-sidebar {
+      position: sticky;
+      top: 85px;
+      max-height: calc(100vh - 105px);
+      overflow-y: auto;
+    }
+  }
+
+  .filter-container {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+
+  .filter-bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: var(--color-surface);
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .toggle-btn {
+    background: none;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--color-remax-blue);
+    cursor: pointer;
+    padding: 0.25rem 0.35rem;
+    border-radius: var(--radius-md);
+    transition: background-color 0.2s ease;
+  }
+
+  .toggle-btn:hover {
+    background-color: #eff6ff;
+  }
+
+  .toggle-icon {
+    transition: transform 0.25s ease;
+    transform: rotate(180deg); /* Apunta hacia arriba al estar abierto */
+  }
+
+  .toggle-icon.is-rotated {
+    transform: rotate(0deg); /* Apunta hacia abajo al estar colapsado */
+  }
+
+  .btn-reset {
+    background-color: var(--color-remax-red);
+    color: #ffffff;
+    border: none;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0.35rem 0.7rem;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    box-shadow: 0 2px 6px rgba(220, 28, 46, 0.2);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .btn-reset:hover {
+    background-color: #b91c1c;
+    transform: translateY(-1px);
+  }
+
+  .filter-content {
+    padding: 1.15rem;
+  }
+
+  .filter-content.is-collapsed {
+    display: none;
+  }
+
+  .filter-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .filter-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+  }
+
+  .range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .range-separator {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    font-weight: 700;
+  }
+
+  .filter-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    background-size: 0.9rem;
+    padding-right: 2rem;
+    cursor: pointer;
+  }
+
+  .filter-select, .filter-input {
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: #ffffff;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .filter-select:focus, .filter-input:focus {
+    border-color: var(--color-remax-blue);
+    box-shadow: 0 0 0 3px rgba(0, 61, 165, 0.12);
+  }
+
+  .filter-group-rooms {
+    padding-top: 0.75rem;
+    border-top: 1px dashed #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .checkbox-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .filter-checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-remax-blue);
+    cursor: pointer;
+  }
+</style>

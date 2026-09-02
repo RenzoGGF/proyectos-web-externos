@@ -1,0 +1,16 @@
+# Node dependencies
+node_modules/
+npm-debug.log*
+
+# Build outputs
+dist/
+.astro/
+
+# Source Data Excel
+data/*.xlsx
+!data/.gitkeep
+
+# OS / Editor files
+.DS_Store
+.vscode/
+.idea/

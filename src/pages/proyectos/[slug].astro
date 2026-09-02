@@ -1,0 +1,669 @@
+---
+import { 
+  ArrowLeft, 
+  AlertTriangle, 
+  MapPin, 
+  Phone, 
+  ExternalLink, 
+  ClipboardList,
+  Navigation,
+  Layers,
+  CalendarDays,
+  Landmark,
+  LayoutGrid,
+  Bed,
+  Bath,
+  Ruler,
+  Building2,
+  KeyRound
+} from 'lucide-astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+
+import projectsData from '../../data/projects.json';
+import advisorsData from '../../data/advisors.json';
+import companiesData from '../../data/companies.json';
+import type { Project, Advisor, Company } from '../../types/index';
+
+export async function getStaticPaths() {
+  const projects = projectsData as Project[];
+  const advisorsMap = new Map((advisorsData as Advisor[]).map((a) => [a.id, a]));
+  const companiesMap = new Map((companiesData as Company[]).map((c) => [c.id, c]));
+
+  return projects.map((project) => ({
+    params: { slug: project.slug },
+    props: {
+      project,
+      advisor: advisorsMap.get(project.asesorId),
+      company: companiesMap.get(project.empresaId)
+    }
+  }));
+}
+
+interface Props {
+  project: Project;
+  advisor?: Advisor;
+  company?: Company;
+}
+
+const { project, advisor, company } = Astro.props;
+
+const LINK_STOCK_EDIFICA = 'https://www.dropbox.com/scl/fo/zh8zyeea685724doeqfdb/AP9VG3fCPRxnTFj_dJ2M0Rc/a.%20Stock%20de%20inmuebles?dl=0&preview=Stock+Disponible.xlsm&rlkey=os4bsfj1if9iumcavw2m0lt48&subfolder_nav_tracking=1';
+
+const esEdificaSur = 
+  company?.nombre?.trim().toUpperCase() === 'EDIFICA INVERSIONES DEL SUR SAC' ||
+  project.empresaId.toLowerCase().includes('edifica-inversiones-del-sur');
+
+const etapaLabelMap: Record<string, string> = {
+  en_planos: 'En planos',
+  en_construccion: 'En construcción',
+  entrega_inmediata: 'Entrega inmediata'
+};
+
+const precioFormateado = project.precioMin
+  ? new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 }).format(project.precioMin)
+  : null;
+
+// Helper Title Case
+function toTitleCase(str: string): string {
+  return str
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+    .join(' ');
+}
+
+// WhatsApp Asesor
+const primerAsesor = advisor?.nombre ? advisor.nombre.split('/')[0].trim() : 'Asesor';
+const primerasDosPalabrasAsesor = primerAsesor.split(/\s+/).filter(Boolean).slice(0, 2).join(' ');
+const asesorMensaje = toTitleCase(primerasDosPalabrasAsesor) || 'Asesor';
+const proyectoMensaje = toTitleCase(project.nombre);
+
+const primerTelefono = advisor?.telefono ? advisor.telefono.split('/')[0].trim() : '';
+const digitosTelefono = primerTelefono.replace(/\D/g, '');
+const telefonoWhatsApp = digitosTelefono.length === 9 && digitosTelefono.startsWith('9')
+  ? `51${digitosTelefono}`
+  : digitosTelefono;
+
+const mensajeWhatsApp = encodeURIComponent(
+  `Hola ${asesorMensaje}, me interesa el proyecto ${proyectoMensaje}...`
+);
+
+const linkWhatsApp = telefonoWhatsApp 
+  ? `https://wa.me/${telefonoWhatsApp}?text=${mensajeWhatsApp}` 
+  : null;
+
+// Búsqueda en Google Maps: <direccion>, <distrito>, Lima, Perú
+const queryMapa = encodeURIComponent(
+  [
+    project.direccion,
+    project.distrito,
+    'Lima, Perú'
+  ].filter(Boolean).join(', ')
+);
+
+const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
+---
+
+<BaseLayout title={`${project.nombre}`}>
+  <Header />
+
+  <main class="container page-main">
+    <a href="/" class="back-link">
+      <ArrowLeft size={16} />
+      <span>Volver al catálogo</span>
+    </a>
+
+    {project.estado === 'vencido' && (
+      <div class="banner-vencido" role="alert">
+        <AlertTriangle size={18} class="banner-icon" />
+        <div>
+          <strong>Aviso:</strong> Este proyecto se encuentra vencido y no está disponible en el catálogo activo.
+        </div>
+      </div>
+    )}
+
+    <article class="project-detail">
+      <header class="detail-header">
+        <div class="title-company-wrapper">
+          <div class="company-brand">
+            <img 
+              src={company?.logo || `/images/companies/${project.empresaId.toLowerCase()}.webp`} 
+              alt={company?.nombre || 'Inmobiliaria'}
+              class="company-logo-img"
+              onerror="this.onerror=null; this.src='/images/companies/default.webp';"
+            />
+            <span class="company-name">{company?.nombre || 'Inmobiliaria'}</span>
+          </div>
+          <h1 class="project-title">{project.nombre}</h1>
+          <p class="project-location">
+            <MapPin size={16} class="location-icon" />
+            <span>{project.distrito} {project.direccion ? `— ${project.direccion}` : ''}</span>
+          </p>
+        </div>
+
+        {precioFormateado && (
+          <div class="price-box">
+            <span class="price-label">Precio desde</span>
+            <span class="price-amount">{precioFormateado}</span>
+          </div>
+        )}
+      </header>
+
+      <div class="detail-grid">
+        <div class="image-box">
+          <img 
+            src={project.imagen} 
+            alt={project.nombre} 
+            class="main-image"
+            onerror="this.onerror=null; this.src='/images/projects/default.webp';"
+          />
+        </div>
+
+        <div class="info-sidebar">
+          <h3>Información del Proyecto</h3>
+          <ul class="info-list">
+            {project.etapa && (
+              <li>
+                <span class="info-label">
+                  <Layers size={16} class="field-icon" />
+                  <span>Etapa:</span>
+                </span>
+                <strong>{etapaLabelMap[project.etapa]}</strong>
+              </li>
+            )}
+
+            {project.fechaEntrega && (
+              <li>
+                <span class="info-label">
+                  <CalendarDays size={16} class="field-icon" />
+                  <span>Entrega:</span>
+                </span>
+                <strong>{project.fechaEntrega.texto}</strong>
+              </li>
+            )}
+
+            {project.financiamiento && project.financiamiento.length > 0 && (
+              <li>
+                <span class="info-label">
+                  <Landmark size={16} class="field-icon" />
+                  <span>Financiamiento:</span>
+                </span>
+                <strong>{project.financiamiento.join(', ')}</strong>
+              </li>
+            )}
+
+            {project.tipologia && project.tipologia.length > 0 && (
+              <li>
+                <span class="info-label">
+                  <LayoutGrid size={16} class="field-icon" />
+                  <span>Tipología:</span>
+                </span>
+                <strong>{project.tipologia.join(', ')}</strong>
+              </li>
+            )}
+
+            {project.habitaciones && project.habitaciones.length > 0 && (
+              <li>
+                <span class="info-label">
+                  <Bed size={16} class="field-icon" />
+                  <span>Habitaciones:</span>
+                </span>
+                <strong>{project.habitaciones.join(', ')} hab.</strong>
+              </li>
+            )}
+
+            {project.banos && project.banos.length > 0 && (
+              <li>
+                <span class="info-label">
+                  <Bath size={16} class="field-icon" />
+                  <span>Baños:</span>
+                </span>
+                <strong>{project.banos.join(', ')} baños</strong>
+              </li>
+            )}
+
+            {project.areaMin && (
+              <li>
+                <span class="info-label">
+                  <Ruler size={16} class="field-icon" />
+                  <span>Área:</span>
+                </span>
+                <strong>
+                  {project.areaMin} m²{project.areaMax ? ` - ${project.areaMax} m²` : ''}
+                </strong>
+              </li>
+            )}
+
+            {project.pisosProyecto !== undefined && (
+              <li>
+                <span class="info-label">
+                  <Building2 size={16} class="field-icon" />
+                  <span>Pisos del proyecto:</span>
+                </span>
+                <strong>{project.pisosProyecto} pisos</strong>
+              </li>
+            )}
+
+            {project.disponibles !== undefined && (
+              <li>
+                <span class="info-label">
+                  <KeyRound size={16} class="field-icon" />
+                  <span>Unidades disponibles:</span>
+                </span>
+                <strong>≤ {project.disponibles}</strong>
+              </li>
+            )}
+          </ul>
+
+          {advisor && (
+            <div class="advisor-card">
+              <div class="advisor-info-text">
+                <h4>Asesor Responsable</h4>
+                <p class="advisor-name">{advisor.nombre}</p>
+                {advisor.telefono && (
+                  <p class="advisor-phone">
+                    <Phone size={15} />
+                    <span>{advisor.telefono}</span>
+                  </p>
+                )}
+              </div>
+
+              {linkWhatsApp && (
+                <a 
+                  href={linkWhatsApp} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="advisor-whatsapp-btn"
+                  title={`Contactar a ${asesorMensaje} por WhatsApp`}
+                  aria-label={`Contactar a ${asesorMensaje} por WhatsApp`}
+                >
+                  <img src="/images/whatsapp-icon.svg" alt="WhatsApp" class="whatsapp-icon-svg" />
+                </a>
+              )}
+            </div>
+          )}
+
+          <div class="action-buttons">
+            {project.enlace && (
+              <a href={project.enlace} target="_blank" rel="noopener noreferrer" class="external-btn">
+                <ExternalLink size={16} />
+                <span>Ver Drive / Web Oficial</span>
+              </a>
+            )}
+
+            {esEdificaSur && (
+              <a href={LINK_STOCK_EDIFICA} target="_blank" rel="noopener noreferrer" class="stock-btn">
+                <ClipboardList size={16} />
+                <span>Ver stock</span>
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL DE UBICACIÓN AL FINAL -->
+      <section class="location-card">
+        <div class="location-header">
+          <div class="location-title">
+            <Navigation size={18} class="location-icon" />
+            <h3>Ubicación aproximada</h3>
+          </div>
+        </div>
+
+        <div class="map-container">
+          <iframe
+            title={`Ubicación de ${project.nombre}`}
+            src={iframeMapUrl}
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </section>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .page-main {
+    padding-top: 1.5rem;
+    padding-bottom: 4rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--color-remax-blue);
+    text-decoration: none;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+  }
+
+  .banner-vencido {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .banner-icon {
+    flex-shrink: 0;
+  }
+
+  .detail-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .detail-header {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+  }
+
+  .company-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .company-logo-img {
+    height: 28px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .company-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+  }
+
+  .project-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+  }
+
+  .project-location {
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+    font-weight: 700;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .location-icon {
+    color: var(--color-remax-blue);
+  }
+
+  .price-box {
+    background-color: var(--color-surface);
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    display: inline-block;
+  }
+
+  .price-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
+
+  .price-amount {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--color-text-main);
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  /* IMAGEN: aspect-ratio 4/5 y altura máxima de 660px */
+  .image-box {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    max-height: 660px;
+    background-color: #e2e8f0;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  @media (min-width: 768px) {
+    .detail-grid {
+      grid-template-columns: 1.2fr 1fr;
+      align-items: start;
+    }
+  }
+
+  .main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .info-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .info-sidebar h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+
+  .info-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .info-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    border-bottom: 1px dashed var(--color-border);
+    padding-bottom: 0.45rem;
+  }
+
+  .info-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--color-text-muted);
+    font-weight: 600;
+  }
+
+  .field-icon {
+    color: var(--color-remax-blue);
+    flex-shrink: 0;
+  }
+
+  .advisor-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .advisor-info-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .advisor-card h4 {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+  }
+
+  .advisor-name {
+    font-weight: 800;
+    margin-top: 0.25rem;
+  }
+
+  .advisor-phone {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .advisor-whatsapp-btn {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background-color: #25d366;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(37, 211, 102, 0.35);
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+  }
+
+  .advisor-whatsapp-btn:hover {
+    background-color: #1eb857;
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 6px 14px rgba(37, 211, 102, 0.45);
+  }
+
+  .whatsapp-icon-svg {
+    width: 40px;
+    height: 40px;
+    display: block;
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .external-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: var(--color-remax-red);
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.95rem;
+    padding: 0.875rem 1.25rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(220, 28, 46, 0.25);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .external-btn:hover {
+    background-color: #b91c1c;
+    transform: translateY(-2px);
+  }
+
+  .stock-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: var(--color-remax-blue);
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.95rem;
+    padding: 0.875rem 1.25rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(0, 61, 165, 0.25);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .stock-btn:hover {
+    background-color: var(--color-remax-dark);
+    transform: translateY(-2px);
+  }
+
+  .location-card {
+    margin-top: 2.5rem;
+    width: 100%;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .location-header {
+    display: flex;
+    align-items: center;
+  }
+
+  .location-title {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .location-title h3 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+  }
+
+  .map-container {
+    width: 100%;
+    height: 280px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background-color: #e2e8f0;
+    border: 1px solid var(--color-border);
+  }
+
+  @media (min-width: 768px) {
+    .map-container {
+      height: 420px;
+    }
+  }
+
+  .map-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+</style>

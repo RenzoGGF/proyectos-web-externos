@@ -1,0 +1,52 @@
+[
+  {
+    "id": "c-grupo-tyc",
+    "nombre": "GRUPO TYC",
+    "logo": "/images/companies/c-grupo-tyc.webp"
+  },
+  {
+    "id": "c-edifica-inversiones-del-sur-sac",
+    "nombre": "EDIFICA INVERSIONES DEL SUR SAC",
+    "logo": "/images/companies/c-edifica-inversiones-del-sur-sac.webp"
+  },
+  {
+    "id": "c-grupo-mg",
+    "nombre": "GRUPO MG",
+    "logo": "/images/companies/c-grupo-mg.webp"
+  },
+  {
+    "id": "c-ter",
+    "nombre": "TER",
+    "logo": "/images/companies/c-ter.webp"
+  },
+  {
+    "id": "c-phormato-edificaciones",
+    "nombre": "PHORMATO EDIFICACIONES",
+    "logo": "/images/companies/c-phormato-edificaciones.webp"
+  },
+  {
+    "id": "c-mallorca",
+    "nombre": "MALLORCA",
+    "logo": "/images/companies/c-mallorca.webp"
+  },
+  {
+    "id": "c-efron",
+    "nombre": "EFRON",
+    "logo": "/images/companies/c-efron.webp"
+  },
+  {
+    "id": "c-illusione-constructora-e-inmobiliaria-sac",
+    "nombre": "ILLUSIONE CONSTRUCTORA E INMOBILIARIA SAC",
+    "logo": "/images/companies/c-illusione-constructora-e-inmobiliaria-sac.webp"
+  },
+  {
+    "id": "c-in-urban",
+    "nombre": "IN URBAN",
+    "logo": "/images/companies/c-in-urban.webp"
+  },
+  {
+    "id": "c-motori-sac",
+    "nombre": "MOTORI SAC",
+    "logo": "/images/companies/c-motori-sac.webp"
+  }
+]
