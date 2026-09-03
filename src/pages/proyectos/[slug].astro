@@ -1,4 +1,6 @@
 ---
+import fs from 'node:fs';
+import path from 'node:path';
 import { 
   ArrowLeft, 
   AlertTriangle, 
@@ -15,7 +17,13 @@ import {
   Bath,
   Ruler,
   Building2,
-  KeyRound
+  KeyRound,
+  TableProperties,
+  Maximize2,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  X
 } from 'lucide-astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
@@ -87,14 +95,20 @@ const telefonoWhatsApp = digitosTelefono.length === 9 && digitosTelefono.startsW
   : digitosTelefono;
 
 const mensajeWhatsApp = encodeURIComponent(
-  `Hola ${asesorMensaje}, me interesa el proyecto ${proyectoMensaje}...`
+  `Hola ${asesorMensaje}, me interesa el proyecto ${proyectoMensaje}`
 );
 
 const linkWhatsApp = telefonoWhatsApp 
   ? `https://wa.me/${telefonoWhatsApp}?text=${mensajeWhatsApp}` 
   : null;
 
-// Búsqueda en Google Maps: <direccion>, <distrito>, Lima, Perú
+// Lógica de Imagen de Stock
+const stockFileName = `s-${project.slug}.webp`;
+const stockDiskPath = path.resolve(process.cwd(), `public/images/stock/${stockFileName}`);
+const hasStockImage = fs.existsSync(stockDiskPath);
+const stockImageUrl = `/images/stock/${stockFileName}`;
+
+// Búsqueda en Google Maps
 const queryMapa = encodeURIComponent(
   [
     project.direccion,
@@ -252,7 +266,7 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
                   <KeyRound size={16} class="field-icon" />
                   <span>Unidades disponibles:</span>
                 </span>
-                <strong>≤ {project.disponibles}</strong>
+                <strong>≥{project.disponibles}</strong>
               </li>
             )}
           </ul>
@@ -303,11 +317,41 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
         </div>
       </div>
 
-      <!-- PANEL DE UBICACIÓN AL FINAL -->
-      <section class="location-card">
-        <div class="location-header">
-          <div class="location-title">
-            <Navigation size={18} class="location-icon" />
+      <!-- PANEL DE STOCK DISPONIBLE -->
+      {hasStockImage && (
+        <section class="bottom-card stock-panel">
+          <div class="bottom-card-header">
+            <div class="bottom-card-title">
+              <TableProperties size={18} class="section-icon" />
+              <h3>IDs subidos a SIGI</h3>
+            </div>
+            <button 
+              type="button" 
+              id="btn-open-stock-modal" 
+              class="bottom-card-action-btn"
+              title="Ampliar imagen"
+            >
+              <Maximize2 size={14} />
+              <span>Ampliar imagen</span>
+            </button>
+          </div>
+
+          <div class="stock-image-container" id="stock-preview-trigger" title="Haz clic para ampliar">
+            <img 
+              src={stockImageUrl} 
+              alt={`Stock disponible - ${project.nombre}`} 
+              loading="lazy" 
+              class="stock-image"
+            />
+          </div>
+        </section>
+      )}
+
+      <!-- PANEL DE UBICACIÓN GMAPS -->
+      <section class="bottom-card location-card">
+        <div class="bottom-card-header">
+          <div class="bottom-card-title">
+            <Navigation size={18} class="section-icon" />
             <h3>Ubicación aproximada</h3>
           </div>
         </div>
@@ -324,7 +368,169 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
       </section>
     </article>
   </main>
+
+  <!-- MODAL / LIGHTBOX DE STOCK CON ZOOM Y ARRASTRE -->
+  {hasStockImage && (
+    <div id="stock-modal" class="stock-modal hidden" role="dialog" aria-modal="true" aria-label="Visor de stock">
+      <div class="modal-backdrop" id="modal-backdrop"></div>
+
+      <!-- BARRA DE HERRAMIENTAS SUPERIOR -->
+      <div class="modal-toolbar">
+        <div class="modal-controls">
+          <button type="button" id="btn-zoom-out" class="control-btn" title="Alejar (-)">
+            <ZoomOut size={18} />
+          </button>
+          <span id="zoom-level-text" class="zoom-text">100%</span>
+          <button type="button" id="btn-zoom-in" class="control-btn" title="Acercar (+)">
+            <ZoomIn size={18} />
+          </button>
+          <button type="button" id="btn-zoom-reset" class="control-btn" title="Restablecer">
+            <RotateCcw size={16} />
+          </button>
+        </div>
+
+        <button type="button" id="btn-modal-close" class="close-btn" title="Cerrar (Esc)">
+          <X size={20} />
+        </button>
+      </div>
+
+      <!-- ÁREA DE VISUALIZACIÓN -->
+      <div class="modal-viewport" id="modal-viewport">
+        <img 
+          id="modal-stock-img" 
+          src={stockImageUrl} 
+          alt={`Stock disponible - ${project.nombre}`} 
+          class="modal-stock-image"
+          draggable="false"
+        />
+      </div>
+    </div>
+  )}
 </BaseLayout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('stock-modal');
+    const backdrop = document.getElementById('modal-backdrop');
+    const btnOpenModal = document.getElementById('btn-open-stock-modal');
+    const previewTrigger = document.getElementById('stock-preview-trigger');
+    const btnClose = document.getElementById('btn-modal-close');
+    
+    const viewport = document.getElementById('modal-viewport');
+    const modalImg = document.getElementById('modal-stock-img') as HTMLImageElement | null;
+    const zoomText = document.getElementById('zoom-level-text');
+    const btnZoomIn = document.getElementById('btn-zoom-in');
+    const btnZoomOut = document.getElementById('btn-zoom-out');
+    const btnZoomReset = document.getElementById('btn-zoom-reset');
+
+    if (!modal || !modalImg) return;
+
+    let scale = 1;
+    let posX = 0;
+    let posY = 0;
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let hasMoved = false;
+
+    function updateTransform(smooth = false) {
+      if (!modalImg) return;
+      modalImg.style.transition = smooth ? 'transform 0.2s ease' : 'none';
+      modalImg.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+      
+      if (zoomText) {
+        zoomText.textContent = `${Math.round(scale * 100)}%`;
+      }
+
+      if (scale > 1) {
+        modalImg.style.cursor = isDragging ? 'grabbing' : 'grab';
+      } else {
+        modalImg.style.cursor = 'zoom-in';
+      }
+    }
+
+    function setZoom(newScale: number, smooth = true) {
+      scale = Math.min(3.5, Math.max(0.75, newScale));
+      if (scale <= 1) {
+        posX = 0;
+        posY = 0;
+      }
+      updateTransform(smooth);
+    }
+
+    function openModal() {
+      modal?.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      setZoom(1, false);
+    }
+
+    function closeModal() {
+      modal?.classList.add('hidden');
+      document.body.style.overflow = '';
+      setZoom(1, false);
+    }
+
+    btnOpenModal?.addEventListener('click', openModal);
+    previewTrigger?.addEventListener('click', openModal);
+    btnClose?.addEventListener('click', closeModal);
+    backdrop?.addEventListener('click', closeModal);
+
+    // Zoom con botones
+    btnZoomIn?.addEventListener('click', () => setZoom(scale + 0.35));
+    btnZoomOut?.addEventListener('click', () => setZoom(scale - 0.35));
+    btnZoomReset?.addEventListener('click', () => setZoom(1));
+
+    // Clic en la imagen: alternar entre 100% y 200%
+    modalImg.addEventListener('click', () => {
+      if (hasMoved) return; // Evitar alternar zoom si se estaba arrastrando
+      if (scale === 1) {
+        setZoom(2);
+      } else {
+        setZoom(1);
+      }
+    });
+
+    // Zoom con la rueda del ratón
+    viewport?.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.25 : -0.25;
+      setZoom(scale + delta, false);
+    }, { passive: false });
+
+    // Panning (Arrastrar imagen cuando scale > 1)
+    modalImg.addEventListener('mousedown', (e) => {
+      if (scale <= 1) return;
+      e.preventDefault();
+      isDragging = true;
+      hasMoved = false;
+      startX = e.clientX - posX;
+      startY = e.clientY - posY;
+      updateTransform();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      hasMoved = true;
+      posX = e.clientX - startX;
+      posY = e.clientY - startY;
+      updateTransform(false);
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        updateTransform();
+      }
+    });
+
+    // Cerrar con Escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal?.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+  });
+</script>
 
 <style>
   .page-main {
@@ -442,7 +648,6 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
     gap: 2rem;
   }
 
-  /* IMAGEN: aspect-ratio 4/5 y altura máxima de 660px */
   .image-box {
     width: 100%;
     aspect-ratio: 4 / 5;
@@ -615,7 +820,8 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
     transform: translateY(-2px);
   }
 
-  .location-card {
+  /* ESTILOS COMUNES DE PANELES INFERIORES */
+  .bottom-card {
     margin-top: 2.5rem;
     width: 100%;
     background-color: var(--color-surface);
@@ -628,23 +834,80 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
     box-shadow: var(--shadow-sm);
   }
 
-  .location-header {
+  .bottom-card-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
-  .location-title {
+  .bottom-card-title {
     display: flex;
     align-items: center;
     gap: 0.45rem;
   }
 
-  .location-title h3 {
+  .bottom-card-title h3 {
     font-size: 1.05rem;
     font-weight: 800;
     color: var(--color-text-main);
   }
 
+  .section-icon {
+    color: var(--color-remax-blue);
+    flex-shrink: 0;
+  }
+
+  .bottom-card-action-btn {
+    background: none;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--color-remax-blue);
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-md);
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .bottom-card-action-btn:hover {
+    color: var(--color-remax-red);
+    background-color: #fee2e2;
+  }
+
+  /* CONTENEDOR PREVIEW DEL STOCK */
+  .stock-image-container {
+    width: 100%;
+    max-height: 520px;
+    background-color: #f8fafc;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+    cursor: zoom-in;
+  }
+
+  .stock-image {
+    max-width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
+    display: block;
+    transition: transform 0.2s ease;
+  }
+
+  .stock-image-container:hover .stock-image {
+    transform: scale(1.01);
+  }
+
+  /* GMAPS */
   .map-container {
     width: 100%;
     height: 280px;
@@ -665,5 +928,123 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
     height: 100%;
     border: none;
     display: block;
+  }
+
+  /* ==========================================
+     MODAL / LIGHTBOX DE STOCK
+     ========================================== */
+  .stock-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .modal-toolbar {
+    position: absolute;
+    top: 1.25rem;
+    left: 1.25rem;
+    right: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1010;
+    pointer-events: none;
+  }
+
+  .modal-controls {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 0.35rem 0.5rem;
+    border-radius: 9999px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--color-border);
+  }
+
+  .control-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .control-btn:hover {
+    background-color: #eff6ff;
+    color: var(--color-remax-blue);
+  }
+
+  .zoom-text {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    min-width: 44px;
+    text-align: center;
+  }
+
+  .close-btn {
+    pointer-events: auto;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-main);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+
+  .close-btn:hover {
+    background-color: var(--color-remax-red);
+    color: #ffffff;
+    transform: scale(1.05);
+  }
+
+  .modal-viewport {
+    position: relative;
+    z-index: 1005;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 4rem 1.5rem 1.5rem;
+  }
+
+  .modal-stock-image {
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+    user-select: none;
+    -webkit-user-drag: none;
+    transform-origin: center center;
+    will-change: transform;
   }
 </style>
