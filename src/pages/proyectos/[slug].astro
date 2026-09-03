@@ -317,14 +317,23 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
         </div>
       </div>
 
-      <!-- PANEL DE STOCK DISPONIBLE -->
+<!-- PANEL DE STOCK DISPONIBLE (IDs SUBIDOS A SIGI) -->
       {hasStockImage && (
         <section class="bottom-card stock-panel">
           <div class="bottom-card-header">
-            <div class="bottom-card-title">
-              <TableProperties size={18} class="section-icon" />
-              <h3>IDs subidos a SIGI</h3>
+            <div class="bottom-card-title-group">
+              <div class="bottom-card-title">
+                <TableProperties size={18} class="section-icon" />
+                <h3>IDs subidos a SIGI</h3>
+              </div>
+              <p class="stock-panel-subtitle">
+                <AlertTriangle size={14} class="subtitle-alert-icon" />
+                <span>
+                  <strong>Importante:</strong> esta imagen no muestra todas las propiedades disponibles. Para consultar el stock completo y actualizado, haz clic en “Ver Stock” o “Ver Drive”.
+                </span>
+              </p>
             </div>
+          
             <button 
               type="button" 
               id="btn-open-stock-modal" 
@@ -837,9 +846,16 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
   .bottom-card-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 1rem;
+  }
+
+  .bottom-card-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    max-width: 780px;
   }
 
   .bottom-card-title {
@@ -852,6 +868,48 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
     font-size: 1.05rem;
     font-weight: 800;
     color: var(--color-text-main);
+  }
+
+.stock-panel-subtitle {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.subtitle-alert-icon {
+  color: #ea580c;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.stock-panel-subtitle strong {
+  color: #9a3412;
+  font-weight: 700;
+}
+
+  .bottom-card-action-btn {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--color-remax-blue);
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-md);
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .bottom-card-action-btn:hover {
+    color: var(--color-remax-red);
+    background-color: #fee2e2;
   }
 
   .section-icon {
