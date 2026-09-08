@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import AgentModal from '../components/AgentModal.astro';
+import TutorialModal from '../components/TutorialModal.astro';
 import { AlertTriangle } from 'lucide-astro';
 
 interface Props {
@@ -48,6 +49,9 @@ const {
 
     <!-- MODAL DE RECOMENDACIONES Y USO INTERNO -->
     <AgentModal />
+
+    <!-- MODAL DE TUTORIALES DE YOUTUBE -->
+    <TutorialModal />
   </body>
 </html>
 
@@ -62,7 +66,6 @@ const {
     flex: 1 0 auto;
   }
 
-  /* FOOTER COMPACTO */
   .site-footer {
     flex-shrink: 0;
     padding: 2rem 0 1.75rem;
@@ -77,7 +80,6 @@ const {
     text-align: center;
   }
 
-  /* BLOQUE PRINCIPAL DELIMITADO */
   .footer-card {
     display: flex;
     flex-direction: column;
@@ -96,7 +98,6 @@ const {
     font-weight: 500;
   }
 
-  /* BOTÓN CON ICONO LUCIDE */
   .footer-agent-btn {
     background: none;
     border: none;
@@ -124,7 +125,6 @@ const {
     transform: translateY(-1px);
   }
 
-  /* TEXTO INFERIOR REMAX FAMILY */
   .footer-brand {
     font-size: 0.76rem;
     font-weight: 800;

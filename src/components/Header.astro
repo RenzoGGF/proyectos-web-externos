@@ -1,5 +1,5 @@
 ---
-import { Search } from 'lucide-astro';
+import { Search, CircleHelp } from 'lucide-astro';
 ---
 
 <header class="site-header">
@@ -15,20 +15,34 @@ import { Search } from 'lucide-astro';
       <span class="brand-title">Proyectos en oficina</span>
     </a>
 
-    <!-- BUSCADOR POR NOMBRE DE PROYECTO -->
-    <form action="/" method="GET" class="header-search-form" role="search">
-      <div class="search-input-wrapper">
-        <Search size={16} class="search-icon" />
-        <input 
-          type="search" 
-          name="q" 
-          id="header-search-input" 
-          class="header-search-input"
-          placeholder="Buscar proyecto..." 
-          autocomplete="off"
-        />
-      </div>
-    </form>
+    <div class="header-actions">
+      <!-- BUSCADOR -->
+      <form action="/" method="GET" class="header-search-form" role="search">
+        <div class="search-input-wrapper">
+          <Search size={16} class="search-icon" />
+          <input 
+            type="search" 
+            name="q" 
+            id="header-search-input" 
+            class="header-search-input"
+            placeholder="Buscar por proyecto..." 
+            autocomplete="off"
+          />
+        </div>
+      </form>
+
+      <!-- BOTÓN TUTORIALES CON ICONO CIRCLE HELP -->
+      <button 
+        type="button" 
+        id="btn-open-tutorial" 
+        class="header-tutorial-btn" 
+        title="Ver tutoriales"
+        aria-label="Ver tutoriales"
+      >
+        <CircleHelp size={16} class="btn-help-icon" />
+        <span class="btn-text">Tutoriales</span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -78,11 +92,19 @@ import { Search } from 'lucide-astro';
     white-space: nowrap;
   }
 
+  /* CONTENEDOR DE ACCIONES DERECHA */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-shrink: 0;
+  }
+
   /* BARRA DE BÚSQUEDA */
   .header-search-form {
     display: flex;
     align-items: center;
-    max-width: 320px;
+    max-width: 280px;
     width: 100%;
   }
 
@@ -102,7 +124,8 @@ import { Search } from 'lucide-astro';
 
   .header-search-input {
     width: 100%;
-    padding: 0.45rem 0.75rem 0.45rem 2.25rem;
+    height: 36px;
+    padding: 0 0.75rem 0 2.25rem;
     font-size: 0.85rem;
     font-weight: 500;
     color: var(--color-text-main);
@@ -118,12 +141,56 @@ import { Search } from 'lucide-astro';
     box-shadow: 0 0 0 3px rgba(0, 61, 165, 0.12);
   }
 
+  /* BOTÓN TUTORIALES */
+  .header-tutorial-btn {
+    height: 36px;
+    padding: 0 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background-color: #eff6ff;
+    color: var(--color-remax-blue);
+    border: 1px solid #bfdbfe;
+    border-radius: 9999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  }
+
+  .header-tutorial-btn:hover {
+    background-color: var(--color-remax-blue);
+    color: #ffffff;
+    border-color: var(--color-remax-blue);
+    transform: translateY(-1px);
+  }
+
+  .btn-help-icon {
+    flex-shrink: 0;
+  }
+
   @media (max-width: 640px) {
     .brand-title, .brand-divider {
-      display: none; /* Ahorra espacio en pantallas móviles pequeñas */
+      display: none;
     }
+
     .header-search-form {
-      max-width: 220px;
+      max-width: 180px;
+    }
+
+    .header-tutorial-btn {
+      width: 36px;
+      padding: 0;
+      border-radius: 50%;
+    }
+
+    .header-tutorial-btn .btn-text {
+      display: none;
     }
   }
 </style>
