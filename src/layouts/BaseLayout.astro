@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import AgentModal from '../components/AgentModal.astro';
 
 interface Props {
   title?: string;
@@ -36,6 +37,9 @@ const {
         </div>
       </footer>
     </div>
+
+    <!-- MODAL DE RECOMENDACIONES Y USO INTERNO -->
+    <AgentModal />
   </body>
 </html>
 

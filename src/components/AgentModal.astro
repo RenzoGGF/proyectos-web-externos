@@ -1,0 +1,252 @@
+---
+import { ShieldAlert, EyeOff, Check } from 'lucide-astro';
+---
+
+<div 
+  id="agent-notice-modal" 
+  class="agent-modal-overlay hidden" 
+  role="dialog" 
+  aria-modal="true" 
+  aria-labelledby="agent-modal-title"
+>
+  <div class="agent-modal-backdrop"></div>
+
+  <div class="agent-modal-card">
+    <div class="agent-modal-header">
+      <div class="agent-modal-icon-badge">
+        <ShieldAlert size={26} class="alert-icon" />
+      </div>
+      <h2 id="agent-modal-title" class="agent-modal-title">Uso exclusivo para agentes</h2>
+    </div>
+
+    <div class="agent-modal-body">
+      <p class="agent-modal-intro">
+        Esta página es una herramienta de uso interno para agentes. <strong>No compartas el enlace directamente con clientes.</strong>
+      </p>
+
+      <div class="agent-avoid-box">
+        <p class="agent-avoid-title">
+          <EyeOff size={16} class="avoid-icon" />
+          <span>Antes de agendar una cita, evita mostrar o mencionar al cliente:</span>
+        </p>
+        <ul class="agent-avoid-list">
+          <li>Fachada del proyecto</li>
+          <li>Dirección exacta</li>
+          <li>Nombre del proyecto</li>
+          <li>Nombre de la constructora</li>
+        </ul>
+      </div>
+
+      <p class="agent-modal-note">
+        Una vez agendada la cita, puedes compartir esta información con el cliente según corresponda.
+      </p>
+
+      <p class="agent-modal-footer-text">
+        Usa esta página como apoyo para conocer los proyectos y brindar una mejor atención.
+      </p>
+    </div>
+
+    <div class="agent-modal-action">
+      <button type="button" id="btn-accept-agent-notice" class="agent-modal-btn">
+        <Check size={18} />
+        <span>Entendido, continuar</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'remax_agent_disclaimer_accepted';
+
+  function setupAgentModal() {
+    const modal = document.getElementById('agent-notice-modal');
+    const btnAccept = document.getElementById('btn-accept-agent-notice');
+
+    if (!modal || !btnAccept) return;
+
+    const isAccepted = sessionStorage.getItem(STORAGE_KEY);
+
+    if (!isAccepted) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    btnAccept.addEventListener('click', () => {
+      sessionStorage.setItem(STORAGE_KEY, 'true');
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupAgentModal);
+</script>
+
+<style>
+  .agent-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    overflow-y: auto;
+  }
+
+  .agent-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .agent-modal-card {
+    position: relative;
+    z-index: 2005;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-elevated);
+    max-width: 520px;
+    width: 100%;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    animation: modalAppear 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes modalAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .agent-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .agent-modal-icon-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: #fee2e2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .alert-icon {
+    color: var(--color-remax-red);
+  }
+
+  .agent-modal-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+  }
+
+  .agent-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    font-size: 0.9rem;
+    color: var(--color-text-main);
+    line-height: 1.5;
+  }
+
+  .agent-modal-intro strong {
+    color: var(--color-remax-red);
+  }
+
+  .agent-avoid-box {
+    background-color: #fff7ed;
+    border: 1px solid #ffedd5;
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .agent-avoid-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #9a3412;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .avoid-icon {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  .agent-avoid-list {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: #7c2d12;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .agent-modal-note {
+    font-weight: 600;
+    color: var(--color-text-main);
+  }
+
+  .agent-modal-footer-text {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+
+  .agent-modal-action {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+  }
+
+  .agent-modal-btn {
+    width: 100%;
+    background-color: var(--color-remax-blue);
+    color: #ffffff;
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 0.8rem 1.25rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 61, 165, 0.25);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .agent-modal-btn:hover {
+    background-color: var(--color-remax-dark);
+    transform: translateY(-1px);
+  }
+
+  @media (min-width: 640px) {
+    .agent-modal-btn {
+      width: auto;
+    }
+  }
+</style>
