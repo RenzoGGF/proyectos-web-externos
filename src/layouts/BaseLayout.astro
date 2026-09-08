@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import AgentModal from '../components/AgentModal.astro';
+import { AlertTriangle } from 'lucide-astro';
 
 interface Props {
   title?: string;
@@ -28,12 +29,19 @@ const {
         <slot />
       </div>
 
-      <!-- FOOTER GLOBAL -->
+      <!-- FOOTER COMPACTO Y CENTRADO -->
       <footer class="site-footer">
-        <div class="container">
-          <p class="footer-disclaimer">
-            Toda información debe tomarse como referencial y es sujeta a cambio.
-          </p>
+        <div class="container footer-content">
+          <div class="footer-card">
+            <p class="footer-disclaimer">Información referencial. Sujeta a cambios.</p>
+
+            <button type="button" id="btn-show-agent-modal" class="footer-agent-btn">
+              <AlertTriangle size={14} class="footer-alert-icon" />
+              <span>Uso exclusivo para agentes · Recomendaciones de uso</span>
+            </button>
+          </div>
+
+          <span class="footer-brand">Remax Family</span>
         </div>
       </footer>
     </div>
@@ -54,16 +62,74 @@ const {
     flex: 1 0 auto;
   }
 
+  /* FOOTER COMPACTO */
   .site-footer {
     flex-shrink: 0;
-    padding: 1.5rem 0;
+    padding: 2rem 0 1.75rem;
     margin-top: auto;
+  }
+
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
     text-align: center;
+  }
+
+  /* BLOQUE PRINCIPAL DELIMITADO */
+  .footer-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.85rem 1.5rem;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    max-width: 540px;
+    width: 100%;
   }
 
   .footer-disclaimer {
     font-size: 0.8rem;
     color: var(--color-text-muted);
     font-weight: 500;
+  }
+
+  /* BOTÓN CON ICONO LUCIDE */
+  .footer-agent-btn {
+    background: none;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-md);
+    transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .footer-alert-icon {
+    color: var(--color-remax-red);
+    flex-shrink: 0;
+  }
+
+  .footer-agent-btn:hover {
+    color: var(--color-remax-blue);
+    background-color: rgba(0, 61, 165, 0.06);
+    transform: translateY(-1px);
+  }
+
+  /* TEXTO INFERIOR REMAX FAMILY */
+  .footer-brand {
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
   }
 </style>

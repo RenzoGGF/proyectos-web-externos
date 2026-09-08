@@ -61,21 +61,34 @@ import { ShieldAlert, EyeOff, Check } from 'lucide-astro';
   function setupAgentModal() {
     const modal = document.getElementById('agent-notice-modal');
     const btnAccept = document.getElementById('btn-accept-agent-notice');
+    const btnOpenFooter = document.getElementById('btn-show-agent-modal');
 
     if (!modal || !btnAccept) return;
 
-    const isAccepted = sessionStorage.getItem(STORAGE_KEY);
-
-    if (!isAccepted) {
-      modal.classList.remove('hidden');
+    function openModal() {
+      modal?.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     }
 
+    function closeModal() {
+      modal?.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // Comprobación inicial de sesión
+    const isAccepted = sessionStorage.getItem(STORAGE_KEY);
+    if (!isAccepted) {
+      openModal();
+    }
+
+    // Botón de aceptar en el modal
     btnAccept.addEventListener('click', () => {
       sessionStorage.setItem(STORAGE_KEY, 'true');
-      modal.classList.add('hidden');
-      document.body.style.overflow = '';
+      closeModal();
     });
+
+    // Abrir de nuevo desde el footer
+    btnOpenFooter?.addEventListener('click', openModal);
   }
 
   document.addEventListener('DOMContentLoaded', setupAgentModal);
