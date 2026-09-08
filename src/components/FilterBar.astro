@@ -133,6 +133,36 @@ const { distritos, aniosEntrega, companies } = Astro.props;
         btnToggle.setAttribute('aria-expanded', String(!isCollapsed));
       }
     });
+
+    // Sincronización de clases activas para inputs y selects
+    const selects = document.querySelectorAll<HTMLSelectElement>('.filter-select');
+    const inputs = document.querySelectorAll<HTMLInputElement>('.filter-input');
+
+    function syncActiveClasses() {
+      selects.forEach((sel) => {
+        sel.classList.toggle('is-active', sel.value !== '');
+      });
+      inputs.forEach((inp) => {
+        inp.classList.toggle('is-active', inp.value.trim() !== '');
+      });
+    }
+
+    selects.forEach((sel) => sel.addEventListener('change', syncActiveClasses));
+    inputs.forEach((inp) => inp.addEventListener('input', syncActiveClasses));
+
+    // Monitorear reseteos desde botones o chips
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target?.closest('#btn-reset-filters') || 
+        target?.closest('#btn-no-results-reset') || 
+        target?.closest('.filter-chip')
+      ) {
+        setTimeout(syncActiveClasses, 10);
+      }
+    });
+
+    syncActiveClasses();
   });
 </script>
 
@@ -188,11 +218,11 @@ const { distritos, aniosEntrega, companies } = Astro.props;
 
   .toggle-icon {
     transition: transform 0.25s ease;
-    transform: rotate(180deg); /* Apunta hacia arriba al estar abierto */
+    transform: rotate(180deg);
   }
 
   .toggle-icon.is-rotated {
-    transform: rotate(0deg); /* Apunta hacia abajo al estar colapsado */
+    transform: rotate(0deg);
   }
 
   .btn-reset {
@@ -254,6 +284,19 @@ const { distritos, aniosEntrega, companies } = Astro.props;
     font-weight: 700;
   }
 
+  /* ESTILO BASE DE SELECTS E INPUTS */
+  .filter-select, .filter-input {
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: #ffffff;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  }
+
   .filter-select {
     appearance: none;
     -webkit-appearance: none;
@@ -263,24 +306,47 @@ const { distritos, aniosEntrega, companies } = Astro.props;
     background-size: 0.9rem;
     padding-right: 2rem;
     cursor: pointer;
+    color: var(--color-text-muted); /* Color gris por defecto tipo placeholder */
   }
 
-  .filter-select, .filter-input {
-    width: 100%;
-    padding: 0.45rem 0.6rem;
-    font-size: 0.85rem;
-    font-weight: 500;
+  /* Asegura que las opciones del desplegable mantengan su color normal */
+  .filter-select option {
     color: var(--color-text-main);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background-color: #ffffff;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    font-weight: 500;
   }
 
-  .filter-select:focus, .filter-input:focus {
+  .filter-select option[value=""] {
+    color: var(--color-text-muted);
+  }
+
+  /* Color gris en placeholders de inputs de texto/número */
+  .filter-input {
+    color: var(--color-text-main);
+  }
+
+  .filter-input::placeholder {
+    color: var(--color-text-muted);
+    opacity: 0.8;
+  }
+
+  /* ESTADOS ACTIVOS: Borde resaltado y fondo sutil */
+  .filter-select.is-active,
+  .filter-select:not(:has(option[value=""]:checked)),
+  .filter-input.is-active,
+  .filter-input:not(:placeholder-shown) {
     border-color: var(--color-remax-blue);
-    box-shadow: 0 0 0 3px rgba(0, 61, 165, 0.12);
+    box-shadow: 0 0 0 1px var(--color-remax-blue);
+    background-color: #f8faff;
+    color: var(--color-text-main);
+    font-weight: 600;
+  }
+
+  /* ESTADO FOCUS */
+  .filter-select:focus, 
+  .filter-input:focus {
+    border-color: var(--color-remax-blue);
+    box-shadow: 0 0 0 3px rgba(0, 61, 165, 0.15);
+    background-color: #ffffff;
   }
 
   .filter-group-rooms {
