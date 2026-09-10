@@ -10,9 +10,9 @@
     "enlace": "https://drive.google.com/drive/folders/1jINnOWyol778LMswpJZyPpmWdofg4okz",
     "etapa": "en_construccion",
     "fechaEntrega": {
-      "texto": "2027 1T",
-      "anio": 2027,
-      "trimestre": 1
+      "texto": "2026 3T",
+      "anio": 2026,
+      "trimestre": 3
     },
     "financiamiento": [
       "Propio"
@@ -116,6 +116,44 @@
     "precioMin": 395296,
     "estado": "activo",
     "imagen": "/images/projects/p-the-muse.webp"
+  },
+  {
+    "id": "p-teo618",
+    "slug": "teo618",
+    "asesorId": "a-sulma-bustillos-987038940",
+    "empresaId": "c-ter",
+    "nombre": "TEO618",
+    "distrito": "Cercado De Lima",
+    "direccion": "Calle Teodoro Cardenas 618, Santa Beatriz",
+    "enlace": "https://drive.google.com/drive/folders/1FgUJ9LraN9LryKPEpXpyjQhneaRtShml",
+    "etapa": "en_planos",
+    "fechaEntrega": {
+      "texto": "2028 1T",
+      "anio": 2028,
+      "trimestre": 1
+    },
+    "financiamiento": [
+      "Otros"
+    ],
+    "tipologia": [
+      "Flat"
+    ],
+    "disponibles": 155,
+    "pisosProyecto": 29,
+    "departamentosPorPiso": 5,
+    "areaMin": 40,
+    "areaMax": 48,
+    "habitaciones": [
+      1,
+      2
+    ],
+    "banos": [
+      1,
+      2
+    ],
+    "precioMin": 249200,
+    "estado": "activo",
+    "imagen": "/images/projects/p-teo618.webp"
   },
   {
     "id": "p-minimal",
@@ -310,41 +348,6 @@
     "precioMin": 395374,
     "estado": "activo",
     "imagen": "/images/projects/p-skyline.webp"
-  },
-  {
-    "id": "p-nius",
-    "slug": "nius",
-    "asesorId": "a-marco-antonio-herrera-989190382",
-    "empresaId": "c-grupo-tyc",
-    "nombre": "NIUS",
-    "distrito": "Magdalena",
-    "direccion": "Av. Javier Prado Oeste 140",
-    "enlace": "https://drive.google.com/drive/folders/1oMHxFyTAZpy-hLC57RZYnOJ2RTZofPuy",
-    "etapa": "entrega_inmediata",
-    "fechaEntrega": null,
-    "financiamiento": [
-      "Propio"
-    ],
-    "tipologia": [
-      "Flat",
-      "Duplex"
-    ],
-    "disponibles": 3,
-    "pisosProyecto": 27,
-    "departamentosPorPiso": 6,
-    "areaMin": 59.9,
-    "areaMax": 126.81,
-    "habitaciones": [
-      2,
-      3
-    ],
-    "banos": [
-      2,
-      3
-    ],
-    "precioMin": 541021,
-    "estado": "activo",
-    "imagen": "/images/projects/p-nius.webp"
   },
   {
     "id": "p-acacias-353",
@@ -835,6 +838,44 @@
     "imagen": "/images/projects/p-urban-heights.webp"
   },
   {
+    "id": "p-bolivar-1209",
+    "slug": "bolivar-1209",
+    "asesorId": "a-sulma-bustillos-987038940",
+    "empresaId": "c-ter",
+    "nombre": "BOLIVAR 1209",
+    "distrito": "Pueblo Libre",
+    "direccion": "Av. Simón Bolívar 1209",
+    "enlace": "https://drive.google.com/drive/folders/1FgUJ9LraN9LryKPEpXpyjQhneaRtShml",
+    "etapa": "entrega_inmediata",
+    "fechaEntrega": null,
+    "financiamiento": [
+      "BBVA",
+      "Otros"
+    ],
+    "tipologia": [
+      "Flat",
+      "Duplex"
+    ],
+    "disponibles": 14,
+    "pisosProyecto": 23,
+    "departamentosPorPiso": 5,
+    "areaMin": 45,
+    "areaMax": 73,
+    "habitaciones": [
+      1,
+      2,
+      3
+    ],
+    "banos": [
+      1,
+      2,
+      3
+    ],
+    "precioMin": 333829.69,
+    "estado": "activo",
+    "imagen": "/images/projects/p-bolivar-1209.webp"
+  },
+  {
     "id": "p-prado-harmony",
     "slug": "prado-harmony",
     "asesorId": "a-marco-antonio-herrera-989190382",
@@ -1291,6 +1332,47 @@
     "imagen": "/images/projects/p-look-and-feel-3.webp"
   },
   {
+    "id": "p-pacifico-299",
+    "slug": "pacifico-299",
+    "asesorId": "a-sulma-bustillos-987038940",
+    "empresaId": "c-ter",
+    "nombre": "PACIFICO 299",
+    "distrito": "Surco",
+    "direccion": "Calle Mar Caribe 188",
+    "enlace": "https://drive.google.com/drive/folders/1FgUJ9LraN9LryKPEpXpyjQhneaRtShml",
+    "etapa": "en_construccion",
+    "fechaEntrega": {
+      "texto": "2027 1T",
+      "anio": 2027,
+      "trimestre": 1
+    },
+    "financiamiento": [
+      "Otros"
+    ],
+    "tipologia": [
+      "Flat",
+      "Duplex"
+    ],
+    "disponibles": 6,
+    "pisosProyecto": 5,
+    "departamentosPorPiso": 2,
+    "areaMin": 90.6,
+    "areaMax": 163.3,
+    "habitaciones": [
+      2,
+      3,
+      4
+    ],
+    "banos": [
+      2,
+      3,
+      4
+    ],
+    "precioMin": 755720,
+    "estado": "activo",
+    "imagen": "/images/projects/p-pacifico-299.webp"
+  },
+  {
     "id": "p-element",
     "slug": "element",
     "asesorId": "a-marcela-cubas-975595610",
@@ -1330,5 +1412,81 @@
     "precioMin": 289020,
     "estado": "activo",
     "imagen": "/images/projects/p-element.webp"
+  },
+  {
+    "id": "p-marsano-park",
+    "slug": "marsano-park",
+    "asesorId": "a-sulma-bustillos-987038940",
+    "empresaId": "c-ter",
+    "nombre": "MARSANO PARK",
+    "distrito": "Surquillo",
+    "direccion": "Av. Tomas Marsano 1855",
+    "enlace": "https://drive.google.com/drive/folders/1FgUJ9LraN9LryKPEpXpyjQhneaRtShml",
+    "etapa": "en_construccion",
+    "fechaEntrega": {
+      "texto": "2027 4T",
+      "anio": 2027,
+      "trimestre": 4
+    },
+    "financiamiento": [
+      "BCP"
+    ],
+    "tipologia": [
+      "Flat"
+    ],
+    "disponibles": 158,
+    "pisosProyecto": 32,
+    "departamentosPorPiso": 7,
+    "areaMin": 48.5,
+    "areaMax": 55.5,
+    "habitaciones": [
+      1,
+      2
+    ],
+    "banos": [
+      2
+    ],
+    "precioMin": 314186.34,
+    "estado": "activo",
+    "imagen": "/images/projects/p-marsano-park.webp"
+  },
+  {
+    "id": "p-morar",
+    "slug": "morar",
+    "asesorId": "a-sulma-bustillos-987038940",
+    "empresaId": "c-ter",
+    "nombre": "MORAR",
+    "distrito": "Surquillo",
+    "direccion": "Av. Tomas Marsano 2253",
+    "enlace": "https://drive.google.com/drive/folders/1FgUJ9LraN9LryKPEpXpyjQhneaRtShml",
+    "etapa": "entrega_inmediata",
+    "fechaEntrega": null,
+    "financiamiento": [
+      "BanBif",
+      "BCP",
+      "BBVA",
+      "Pichincha",
+      "GNB",
+      "Interbank",
+      "Scotiabank",
+      "Otros"
+    ],
+    "tipologia": [
+      "Flat"
+    ],
+    "disponibles": 2,
+    "pisosProyecto": 34,
+    "departamentosPorPiso": 5,
+    "areaMin": 71.04,
+    "areaMax": 71.04,
+    "habitaciones": [
+      3
+    ],
+    "banos": [
+      2
+    ],
+    "precioMin": 499000,
+    "estado": "activo",
+    "imagen": "/images/projects/p-morar.webp"
   }
 ]
