@@ -10,9 +10,9 @@
     "enlace": "https://drive.google.com/drive/folders/1jINnOWyol778LMswpJZyPpmWdofg4okz",
     "etapa": "en_construccion",
     "fechaEntrega": {
-      "texto": "2026 3T",
-      "anio": 2026,
-      "trimestre": 3
+      "texto": "2027 1T",
+      "anio": 2027,
+      "trimestre": 1
     },
     "financiamiento": [
       "Propio"
@@ -20,10 +20,10 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 19,
+    "disponibles": 14,
     "pisosProyecto": 22,
     "departamentosPorPiso": 10,
-    "areaMin": 38.05,
+    "areaMin": 41.75,
     "areaMax": 82.96,
     "habitaciones": [
       1,
@@ -31,10 +31,9 @@
       3
     ],
     "banos": [
-      1,
       2
     ],
-    "precioMin": 335645,
+    "precioMin": 371333,
     "estado": "activo",
     "imagen": "/images/projects/p-aspiria.webp"
   },
@@ -60,7 +59,7 @@
       "Flat",
       "Duplex"
     ],
-    "disponibles": 127,
+    "disponibles": 123,
     "pisosProyecto": 22,
     "departamentosPorPiso": 17,
     "areaMin": 40,
@@ -99,7 +98,7 @@
       "Flat",
       "Loft"
     ],
-    "disponibles": 198,
+    "disponibles": 190,
     "pisosProyecto": 22,
     "departamentosPorPiso": 24,
     "areaMin": 40,
@@ -116,44 +115,6 @@
     "precioMin": 395296,
     "estado": "activo",
     "imagen": "/images/projects/p-the-muse.webp"
-  },
-  {
-    "id": "p-teo618",
-    "slug": "teo618",
-    "asesorId": "a-sulma-bustillos-987038940",
-    "empresaId": "c-ter",
-    "nombre": "TEO618",
-    "distrito": "Cercado De Lima",
-    "direccion": "Calle Teodoro Cardenas 618, Santa Beatriz",
-    "enlace": "https://drive.google.com/drive/folders/1FgUJ9LraN9LryKPEpXpyjQhneaRtShml",
-    "etapa": "en_planos",
-    "fechaEntrega": {
-      "texto": "2028 1T",
-      "anio": 2028,
-      "trimestre": 1
-    },
-    "financiamiento": [
-      "Otros"
-    ],
-    "tipologia": [
-      "Flat"
-    ],
-    "disponibles": 155,
-    "pisosProyecto": 29,
-    "departamentosPorPiso": 5,
-    "areaMin": 40,
-    "areaMax": 48,
-    "habitaciones": [
-      1,
-      2
-    ],
-    "banos": [
-      1,
-      2
-    ],
-    "precioMin": 249200,
-    "estado": "activo",
-    "imagen": "/images/projects/p-teo618.webp"
   },
   {
     "id": "p-minimal",
@@ -176,7 +137,7 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 154,
+    "disponibles": 145,
     "pisosProyecto": 30,
     "departamentosPorPiso": 11,
     "areaMin": 23.97,
@@ -214,7 +175,7 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 184,
+    "disponibles": 185,
     "pisosProyecto": 37,
     "departamentosPorPiso": 11,
     "areaMin": 25.18,
@@ -248,12 +209,12 @@
       "trimestre": 3
     },
     "financiamiento": [
-      "Propio"
+      "BCP"
     ],
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 82,
+    "disponibles": 79,
     "pisosProyecto": 23,
     "departamentosPorPiso": 8,
     "areaMin": 36.5,
@@ -293,7 +254,7 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 115,
+    "disponibles": 95,
     "pisosProyecto": 23,
     "departamentosPorPiso": 12,
     "areaMin": 21.95,
@@ -306,7 +267,7 @@
       1,
       2
     ],
-    "precioMin": 213605,
+    "precioMin": 205330,
     "estado": "activo",
     "imagen": "/images/projects/p-mural.webp"
   },
@@ -331,11 +292,11 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 90,
+    "disponibles": 111,
     "pisosProyecto": 18,
     "departamentosPorPiso": 22,
     "areaMin": 40,
-    "areaMax": 91.61,
+    "areaMax": 79.9,
     "habitaciones": [
       1,
       2,
@@ -345,7 +306,7 @@
       1,
       2
     ],
-    "precioMin": 395374,
+    "precioMin": 387501,
     "estado": "activo",
     "imagen": "/images/projects/p-skyline.webp"
   },
@@ -360,9 +321,9 @@
     "enlace": "https://www.dropbox.com/scl/fo/zh8zyeea685724doeqfdb/AFCf2Rj964t_cVkbmrgNh2I/e.%20Proyectos%20en%20Miraflores/Proyecto%20Acacias?rlkey=os4bsfj1if9iumcavw2m0lt48&e=1&dl=0",
     "etapa": "en_construccion",
     "fechaEntrega": {
-      "texto": "2026 4T",
-      "anio": 2026,
-      "trimestre": 4
+      "texto": "2027 1T",
+      "anio": 2027,
+      "trimestre": 1
     },
     "financiamiento": [
       "BBVA"
@@ -371,11 +332,11 @@
       "Flat",
       "Duplex"
     ],
-    "disponibles": 19,
+    "disponibles": 15,
     "pisosProyecto": 8,
     "departamentosPorPiso": 15,
-    "areaMin": 65.41,
-    "areaMax": 194.21,
+    "areaMin": 63.93,
+    "areaMax": 180.97,
     "habitaciones": [
       1,
       2
@@ -384,7 +345,7 @@
       2,
       3
     ],
-    "precioMin": 762833,
+    "precioMin": 621133,
     "estado": "activo",
     "imagen": "/images/projects/p-acacias-353.webp"
   },
@@ -410,7 +371,7 @@
       "Flat",
       "Duplex"
     ],
-    "disponibles": 63,
+    "disponibles": 55,
     "pisosProyecto": 20,
     "departamentosPorPiso": 5,
     "areaMin": 40.01,
@@ -449,19 +410,20 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 110,
+    "disponibles": 121,
     "pisosProyecto": 17,
     "departamentosPorPiso": 8,
     "areaMin": 60.05,
-    "areaMax": 75.93,
+    "areaMax": 86.23,
     "habitaciones": [
       1,
       2
     ],
     "banos": [
-      2
+      2,
+      3
     ],
-    "precioMin": 621627,
+    "precioMin": 626543,
     "estado": "activo",
     "imagen": "/images/projects/p-legacy.webp"
   },
@@ -481,13 +443,13 @@
       "trimestre": 3
     },
     "financiamiento": [
-      "Propio"
+      "BCP"
     ],
     "tipologia": [
       "Flat",
       "Duplex"
     ],
-    "disponibles": 57,
+    "disponibles": 50,
     "pisosProyecto": 18,
     "departamentosPorPiso": 11,
     "areaMin": 68.01,
@@ -532,37 +494,6 @@
     "precioMin": 1225700,
     "estado": "activo",
     "imagen": "/images/projects/p-chamberi-123.webp"
-  },
-  {
-    "id": "p-llano-zapata-431",
-    "slug": "llano-zapata-431",
-    "asesorId": "a-mery-ann-montalvo-996642129",
-    "empresaId": "c-illusione-constructora-e-inmobiliaria-sac",
-    "nombre": "LLANO ZAPATA 431",
-    "distrito": "Miraflores",
-    "direccion": "Llano Zapata 431",
-    "enlace": "https://1drv.ms/f/c/1fb1ceb2e26a2f8f/IgB2qgyj5fRTR6c3GkKI6b0OAc4ZKrEn90fMylJCD8JZ9Iw?e=mDBuAh",
-    "etapa": "en_construccion",
-    "fechaEntrega": {
-      "texto": "2027 1T",
-      "anio": 2027,
-      "trimestre": 1
-    },
-    "financiamiento": [],
-    "tipologia": [
-      "Penthouse"
-    ],
-    "disponibles": 1,
-    "pisosProyecto": 8,
-    "areaMin": 348.54,
-    "areaMax": 348.54,
-    "habitaciones": [
-      3
-    ],
-    "banos": [],
-    "precioMin": 2985200,
-    "estado": "activo",
-    "imagen": "/images/projects/p-llano-zapata-431.webp"
   },
   {
     "id": "p-meiggs-210",
@@ -652,17 +583,16 @@
       "Garden House",
       "Penthouse"
     ],
-    "disponibles": 11,
+    "disponibles": 10,
     "pisosProyecto": 8,
     "areaMin": 63.9,
     "areaMax": 190.74,
     "habitaciones": [
       1,
-      2,
-      3
+      2
     ],
     "banos": [],
-    "precioMin": 659600,
+    "precioMin": 707200,
     "estado": "activo",
     "imagen": "/images/projects/p-colon-470.webp"
   },
@@ -681,14 +611,16 @@
       "BBVA"
     ],
     "tipologia": [
-      "Duplex"
+      "Duplex",
+      "Penthouse"
     ],
-    "disponibles": 1,
+    "disponibles": 2,
     "pisosProyecto": 11,
     "areaMin": 91.61,
-    "areaMax": 91.61,
+    "areaMax": 142.36,
     "habitaciones": [
-      1
+      1,
+      2
     ],
     "banos": [],
     "precioMin": 839800,
@@ -712,7 +644,7 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 14,
+    "disponibles": 11,
     "pisosProyecto": 16,
     "departamentosPorPiso": 12,
     "areaMin": 75.64,
@@ -776,9 +708,9 @@
     "enlace": "https://drive.google.com/drive/folders/1RSZ2x9z3zHLB62CLbA2FxozkrPJEfNQy",
     "etapa": "en_construccion",
     "fechaEntrega": {
-      "texto": "2026 4T",
-      "anio": 2026,
-      "trimestre": 4
+      "texto": "2027 1T",
+      "anio": 2027,
+      "trimestre": 1
     },
     "financiamiento": [
       "Propio"
@@ -786,18 +718,19 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 8,
+    "disponibles": 9,
     "pisosProyecto": 22,
     "departamentosPorPiso": 6,
-    "areaMin": 63.8,
+    "areaMin": 51.63,
     "areaMax": 103.89,
     "habitaciones": [
+      1,
       2
     ],
     "banos": [
       2
     ],
-    "precioMin": 769838,
+    "precioMin": 504585,
     "estado": "activo",
     "imagen": "/images/projects/p-pardo-coast.webp"
   },
@@ -819,10 +752,10 @@
       "Flat",
       "Duplex"
     ],
-    "disponibles": 15,
+    "disponibles": 12,
     "pisosProyecto": 21,
     "departamentosPorPiso": 8,
-    "areaMin": 40.16,
+    "areaMin": 41.34,
     "areaMax": 150.09,
     "habitaciones": [
       1,
@@ -833,7 +766,7 @@
       2,
       3
     ],
-    "precioMin": 447890,
+    "precioMin": 483437,
     "estado": "activo",
     "imagen": "/images/projects/p-urban-heights.webp"
   },
@@ -896,7 +829,7 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 426,
+    "disponibles": 411,
     "pisosProyecto": 33,
     "departamentosPorPiso": 19,
     "areaMin": 26.49,
@@ -909,7 +842,7 @@
       1,
       2
     ],
-    "precioMin": 229559,
+    "precioMin": 236782,
     "estado": "activo",
     "imagen": "/images/projects/p-prado-harmony.webp"
   },
@@ -934,7 +867,7 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 114,
+    "disponibles": 90,
     "pisosProyecto": 21,
     "departamentosPorPiso": 12,
     "areaMin": 48.63,
@@ -973,10 +906,10 @@
       "Flat",
       "Oficina"
     ],
-    "disponibles": 81,
+    "disponibles": 77,
     "pisosProyecto": 33,
     "departamentosPorPiso": 10,
-    "areaMin": 39.81,
+    "areaMin": 30.17,
     "areaMax": 82.41,
     "habitaciones": [
       0,
@@ -987,9 +920,45 @@
       1,
       2
     ],
-    "precioMin": 352614,
+    "precioMin": 303313,
     "estado": "activo",
     "imagen": "/images/projects/p-tree.webp"
+  },
+  {
+    "id": "p-aramburu-living",
+    "slug": "aramburu-living",
+    "asesorId": "a-marco-antonio-herrera-989190382",
+    "empresaId": "c-grupo-tyc",
+    "nombre": "ARAMBURU LIVING",
+    "distrito": "San Isidro",
+    "direccion": "Av. Aramburú 535",
+    "enlace": "https://drive.google.com/drive/folders/1G0hoNlt8KP4AgXAEefhV6__xnC_BRxlg",
+    "etapa": "en_construccion",
+    "fechaEntrega": {
+      "texto": "2027 2T",
+      "anio": 2027,
+      "trimestre": 2
+    },
+    "financiamiento": [
+      "BBVA"
+    ],
+    "tipologia": [
+      "Flat"
+    ],
+    "disponibles": 6,
+    "areaMin": 46.35,
+    "areaMax": 70.27,
+    "habitaciones": [
+      1,
+      2
+    ],
+    "banos": [
+      1,
+      2
+    ],
+    "precioMin": 352856,
+    "estado": "activo",
+    "imagen": "/images/projects/p-aramburu-living.webp"
   },
   {
     "id": "p-ascent",
@@ -1013,7 +982,7 @@
       "Flat",
       "Duplex"
     ],
-    "disponibles": 50,
+    "disponibles": 47,
     "pisosProyecto": 22,
     "departamentosPorPiso": 8,
     "areaMin": 60,
@@ -1085,21 +1054,20 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 41,
+    "disponibles": 32,
     "pisosProyecto": 33,
     "departamentosPorPiso": 8,
-    "areaMin": 45.67,
-    "areaMax": 80.51,
+    "areaMin": 40.09,
+    "areaMax": 79.99,
     "habitaciones": [
       1,
-      2,
-      3
+      2
     ],
     "banos": [
       1,
       2
     ],
-    "precioMin": 384965,
+    "precioMin": 371997,
     "estado": "activo",
     "imagen": "/images/projects/p-palm-living.webp"
   },
@@ -1125,10 +1093,10 @@
       "Flat",
       "Oficina"
     ],
-    "disponibles": 276,
+    "disponibles": 290,
     "pisosProyecto": 32,
-    "areaMin": 25.4,
-    "areaMax": 92.98,
+    "areaMin": 44.58,
+    "areaMax": 78.29,
     "habitaciones": [
       0,
       1,
@@ -1139,7 +1107,7 @@
       1,
       2
     ],
-    "precioMin": 264503,
+    "precioMin": 316730,
     "estado": "activo",
     "imagen": "/images/projects/p-vertyce.webp"
   },
@@ -1164,11 +1132,11 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 363,
+    "disponibles": 421,
     "pisosProyecto": 22,
     "departamentosPorPiso": 26,
     "areaMin": 23.41,
-    "areaMax": 158.57,
+    "areaMax": 75.59,
     "habitaciones": [
       1,
       2,
@@ -1178,9 +1146,43 @@
       1,
       2
     ],
-    "precioMin": 160703,
+    "precioMin": 156414,
     "estado": "activo",
     "imagen": "/images/projects/p-costanova.webp"
+  },
+  {
+    "id": "p-bertolotto",
+    "slug": "bertolotto",
+    "asesorId": "a-marco-antonio-herrera-989190382",
+    "empresaId": "c-grupo-tyc",
+    "nombre": "BERTOLOTTO",
+    "distrito": "San Miguel",
+    "direccion": "Av. Bertolotto 752",
+    "enlace": "https://drive.google.com/drive/folders/1-ArNviCd11iRtHFL-ydulrALWk3sLYYC",
+    "etapa": "entrega_inmediata",
+    "fechaEntrega": null,
+    "financiamiento": [
+      "BBVA"
+    ],
+    "tipologia": [
+      "Flat"
+    ],
+    "disponibles": 3,
+    "pisosProyecto": 17,
+    "areaMin": 69.66,
+    "areaMax": 177.39,
+    "habitaciones": [
+      2,
+      3,
+      4
+    ],
+    "banos": [
+      2,
+      3
+    ],
+    "precioMin": 470250,
+    "estado": "activo",
+    "imagen": "/images/projects/p-bertolotto.webp"
   },
   {
     "id": "p-hub-encalada",
@@ -1203,10 +1205,10 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 51,
+    "disponibles": 43,
     "pisosProyecto": 14,
     "departamentosPorPiso": 10,
-    "areaMin": 40.38,
+    "areaMin": 41.63,
     "areaMax": 85.45,
     "habitaciones": [
       1,
@@ -1218,7 +1220,7 @@
       2,
       3
     ],
-    "precioMin": 388430,
+    "precioMin": 394328,
     "estado": "activo",
     "imagen": "/images/projects/p-hub-encalada.webp"
   },
@@ -1243,7 +1245,7 @@
     "tipologia": [
       "Oficina"
     ],
-    "disponibles": 277,
+    "disponibles": 271,
     "areaMin": 26.86,
     "areaMax": 83.84,
     "habitaciones": [
@@ -1267,9 +1269,9 @@
     "enlace": "https://drive.google.com/drive/folders/1hm5Sc78cxd5rnkvSTVrZm462Ha-VbpvN",
     "etapa": "en_construccion",
     "fechaEntrega": {
-      "texto": "2026 3T",
-      "anio": 2026,
-      "trimestre": 3
+      "texto": "2027 1T",
+      "anio": 2027,
+      "trimestre": 1
     },
     "financiamiento": [
       "Propio"
@@ -1315,7 +1317,7 @@
     "tipologia": [
       "Flat"
     ],
-    "disponibles": 307,
+    "disponibles": 301,
     "areaMin": 43.23,
     "areaMax": 97.44,
     "habitaciones": [
@@ -1383,9 +1385,9 @@
     "enlace": "https://www.dropbox.com/scl/fo/zh8zyeea685724doeqfdb/AEB4Ny3ZxW6hoXSBfv4qAuU/g.%20Proyectos%20en%20Surquillo?dl=0&rlkey=os4bsfj1if9iumcavw2m0lt48&subfolder_nav_tracking=1",
     "etapa": "en_construccion",
     "fechaEntrega": {
-      "texto": "2026 4T",
-      "anio": 2026,
-      "trimestre": 4
+      "texto": "2027 1T",
+      "anio": 2027,
+      "trimestre": 1
     },
     "financiamiento": [
       "Scotiabank"
@@ -1395,7 +1397,7 @@
       "Loft",
       "Duplex"
     ],
-    "disponibles": 61,
+    "disponibles": 50,
     "pisosProyecto": 22,
     "departamentosPorPiso": 13,
     "areaMin": 28.91,
@@ -1409,7 +1411,7 @@
       2,
       3
     ],
-    "precioMin": 289020,
+    "precioMin": 294058,
     "estado": "activo",
     "imagen": "/images/projects/p-element.webp"
   },
