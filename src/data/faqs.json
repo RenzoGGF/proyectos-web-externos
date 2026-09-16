@@ -1,0 +1,90 @@
+{
+  "c-grupo-tyc": [
+    {
+      "pregunta": "¿Cómo son las comisiones?",
+      "respuesta": "<p>Las comisiones dependen de la fase en la que se encuentra el proyecto y del tipo de venta:</p><ul><li><strong>Fase de preventa y en construcción:</strong><ul><li>Venta directa o con crédito hipotecario (CH): <strong>2.75% + IGV</strong>.</li><li>Venta al contado: <strong>3% + IGV</strong>.</li></ul></li><li><strong>Fase de entrega inmediata:</strong><ul><li>Para cualquier tipo de venta: <strong>3.5% + IGV</strong>.</li></ul></li></ul><p><br>Las comisiones se dividirán entre el asesor responsable del proyecto y el asesor con el cliente comprador.</p>"
+    },
+    {
+      "pregunta": "¿Cuándo se paga la comisión?",
+      "respuesta": "<p>Una vez pagada la cuota inicial, la constructora abona la comisión a la oficina de REMAX.</p>"
+    },
+    {
+      "pregunta": "¿Cómo se realiza la separación de un departamento?",
+      "respuesta": "<p>El comprador realiza una transferencia a la cuenta de la constructora.</p>"
+    },
+    {
+      "pregunta": "¿Qué facilidades de pago hay?",
+      "respuesta": "<p>Solo el responsable de la constructora puede negociar facilidades de pago y descuentos.</p><p>En proyectos con una fecha de entrega distante (2027, 2028 o 2029), después de recibir la cuota inicial (10% a 15%), el comprador puede continuar realizando pagos, manteniendo el precio congelado y sin pago de intereses, hasta un mes antes de la entrega.</p><p>El monto acumulado se suma a la cuota inicial, convirtiéndose en una cuota inicial mayor al 20%, lo que permite disminuir el saldo pendiente sin pago de intereses.</p><p>El desembolso, ya sea mediante efectivo (cash) o crédito hipotecario, se realiza un mes antes de la entrega.</p>"
+    },
+    {
+      "pregunta": "¿Qué necesito para agendar la visita al proyecto o piloto?",
+      "respuesta": "<p>Para agendar una visita, debes confirmar el día y la hora con un mínimo de 24 horas de anticipación para poder programarla. Se requiere la siguiente información:</p><ul><li>Nombres y apellidos completos.</li><li>DNI.</li><li>Correo electrónico.</li><li>Número telefónico.</li></ul><p>En caso de asistir con uno o más acompañantes, se solicitarán los mismos datos de cada uno.</p>"
+    }
+  ],
+  "c-edifica-inversiones-del-sur-sac": [
+    {
+      "pregunta": "¿Cómo son las comisiones?",
+      "respuesta": "<p>La comisión es del <strong>3%</strong>, incluido el IGV.</p><p>La comisión se dividirá entre el asesor responsable del proyecto y el asesor con el cliente comprador.</p>"
+    },
+    {
+      "pregunta": "¿Cuándo se paga la comisión?",
+      "respuesta": "<p>La comisión se paga cuando el cliente ha abonado el <strong>10%</strong> de la cuota inicial.</p><p>Family solicita el pago de la comisión por correo electrónico y el proceso demora entre <strong>15 y 20 días</strong>.</p>"
+    },
+    {
+      "pregunta": "¿Cómo se realiza la separación de un departamento?",
+      "respuesta": "<p>La separación se realiza durante la entrevista con el ejecutivo de ventas, mediante un depósito en la cuenta de Edifica.</p><p>El monto de separación es de <strong>S/ 1,000 a S/ 2,000</strong>.</p>"
+    },
+    {
+      "pregunta": "¿Qué facilidades de pago hay?",
+      "respuesta": "<p>Se ofrecen descuentos del <strong>3%</strong>.</p><p>El pago del <strong>20%</strong> de la cuota inicial se puede realizar de la siguiente manera:</p><ul><li><strong>10%:</strong> a la semana de realizar la separación.</li><li><strong>10% restante:</strong> en cuotas, según el acuerdo establecido y el plazo de entrega del departamento.</li></ul><p>El <strong>80%</strong> restante se paga dos meses antes de la entrega del departamento.</p>"
+    },
+    {
+      "pregunta": "¿Qué necesito para agendar la visita al proyecto o piloto?",
+      "respuesta": "<p>Para agendar una visita, debes confirmar el día y la hora con un mínimo de 24 horas de anticipación para poder programarla. Se requiere la siguiente información:</p><ul><li>Nombres y apellidos completos.</li><li>DNI.</li><li>Correo electrónico.</li><li>Número telefónico.</li></ul><p>En caso de asistir con uno o más acompañantes, se solicitarán los mismos datos de cada uno.</p>"
+    }
+  ],
+  "c-illusione-constructora-e-inmobiliaria-sac": [
+    {
+      "pregunta": "¿Cómo son las comisiones?",
+      "respuesta": "<p>La comisión es del <strong>3%</strong>, incluido el IGV.</p><p>La comisión se dividirá entre el asesor responsable del proyecto y el asesor con el cliente comprador.</p>"
+    },
+    {
+      "pregunta": "¿Cuándo se paga la comisión?",
+      "respuesta": "<p>La comisión se paga cuando el cliente ha abonado al menos el <strong>30%</strong> del valor total de la venta.</p>"
+    },
+    {
+      "pregunta": "¿Cómo se realiza la separación de un departamento?",
+      "respuesta": "<p>La separación se realiza mediante un depósito en la cuenta de la inmobiliaria, que se encarga de emitir la documentación correspondiente.</p>"
+    },
+    {
+      "pregunta": "¿Qué facilidades de pago hay?",
+      "respuesta": "<p>Se puede pagar la cuota inicial en cuotas cuando el proyecto tiene un plazo aproximado de un año y medio, o según lo que se acuerde con la inmobiliaria.</p><p>La inmobiliaria brinda facilidades de pago y el desembolso total se realiza <strong>30 días antes</strong> de la entrega del departamento.</p>"
+    },
+    {
+      "pregunta": "¿Qué necesito para agendar la visita al proyecto o piloto?",
+      "respuesta": "<p>Para agendar una visita, debes confirmar el día y la hora con un mínimo de 24 horas de anticipación para poder programarla. Se requiere la siguiente información:</p><ul><li>Nombres y apellidos completos.</li><li>DNI.</li><li>Correo electrónico.</li><li>Número telefónico.</li></ul><p>En caso de asistir con uno o más acompañantes, se solicitarán los mismos datos de cada uno.</p>"
+    }
+  ],
+  "c-ter": [
+    {
+      "pregunta": "¿Cómo son las comisiones?",
+      "respuesta": "<p>La comisión es del <strong>2.5%</strong>, incluido el IGV.</p><p>La comisión se dividirá entre el asesor responsable del proyecto y el asesor con el cliente comprador.</p>"
+    },
+    {
+      "pregunta": "¿Cuándo se paga la comisión?",
+      "respuesta": "<p>La comisión se paga cuando el cliente ha cancelado el <strong>20%</strong> del valor del departamento.</p><p>El pago de la comisión al agente inmobiliario se realiza en un plazo de <strong>15 días</strong>.</p>"
+    },
+    {
+      "pregunta": "¿Cómo se realiza la separación de un departamento?",
+      "respuesta": "<p>La separación se realiza mediante un depósito en la cuenta de la inmobiliaria, por un monto mínimo de <strong>S/ 2,000</strong>.</p>"
+    },
+    {
+      "pregunta": "¿Qué facilidades de pago hay?",
+      "respuesta": "<p>Se brindan facilidades de pago según las fechas de entrega de los departamentos, coordinando opciones que se adapten a las posibilidades del cliente.</p><p>Las condiciones son negociables y se evalúan de acuerdo con la situación de cada cliente.</p>"
+    },
+    {
+      "pregunta": "¿Qué necesito para agendar la visita al proyecto o piloto?",
+      "respuesta": "<p>Para agendar una visita, debes confirmar el día y la hora con un mínimo de 24 horas de anticipación para poder programarla. Se requiere la siguiente información:</p><ul><li>Nombres y apellidos completos.</li><li>DNI.</li><li>Correo electrónico.</li><li>Número telefónico.</li></ul><p>En caso de asistir con uno o más acompañantes, se solicitarán los mismos datos de cada uno.</p>"
+    }
+  ]
+}

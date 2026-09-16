@@ -23,7 +23,9 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
-  X
+  X,
+  HelpCircle,
+  ChevronDown
 } from 'lucide-astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
@@ -31,6 +33,7 @@ import Header from '../../components/Header.astro';
 import projectsData from '../../data/projects.json';
 import advisorsData from '../../data/advisors.json';
 import companiesData from '../../data/companies.json';
+import faqsData from '../../data/faqs.json';
 import type { Project, Advisor, Company } from '../../types/index';
 
 export async function getStaticPaths() {
@@ -56,6 +59,15 @@ interface Props {
 
 const { project, advisor, company } = Astro.props;
 
+// FAQS DE LA EMPRESA
+interface FaqItem {
+  pregunta: string;
+  respuesta: string;
+}
+
+const faqsRecord = faqsData as Record<string, FaqItem[]>;
+const companyFaqs: FaqItem[] = faqsRecord[project.empresaId.toLowerCase()] || [];
+
 const LINK_STOCK_EDIFICA = 'https://www.dropbox.com/scl/fo/zh8zyeea685724doeqfdb/AP9VG3fCPRxnTFj_dJ2M0Rc/a.%20Stock%20de%20inmuebles?dl=0&preview=Stock+Disponible.xlsm&rlkey=os4bsfj1if9iumcavw2m0lt48&subfolder_nav_tracking=1';
 
 const esEdificaSur = 
@@ -72,7 +84,6 @@ const precioFormateado = project.precioMin
   ? new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 }).format(project.precioMin)
   : null;
 
-// Helper Title Case
 function toTitleCase(str: string): string {
   return str
     .toLowerCase()
@@ -102,13 +113,13 @@ const linkWhatsApp = telefonoWhatsApp
   ? `https://wa.me/${telefonoWhatsApp}?text=${mensajeWhatsApp}` 
   : null;
 
-// Lógica de Imagen de Stock
+// Stock Image Check
 const stockFileName = `s-${project.slug}.webp`;
 const stockDiskPath = path.resolve(process.cwd(), `public/images/stock/${stockFileName}`);
 const hasStockImage = fs.existsSync(stockDiskPath);
 const stockImageUrl = `/images/stock/${stockFileName}`;
 
-// Búsqueda en Google Maps
+// Maps URL
 const queryMapa = encodeURIComponent(
   [
     project.direccion,
@@ -165,6 +176,7 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
         )}
       </header>
 
+      <!-- SECCIÓN PRINCIPAL: IMAGEN + DETALLES -->
       <div class="detail-grid">
         <div class="image-box">
           <img 
@@ -264,9 +276,9 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
               <li>
                 <span class="info-label">
                   <KeyRound size={16} class="field-icon" />
-                  <span>Unidades estimadas:</span>
+                  <span>Unidades disponibles:</span>
                 </span>
-                <strong>≥ {project.disponibles}</strong>
+                <strong>≥{project.disponibles}</strong>
               </li>
             )}
           </ul>
@@ -317,7 +329,36 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
         </div>
       </div>
 
-<!-- PANEL DE STOCK DISPONIBLE (IDs SUBIDOS A SIGI) -->
+      <!-- PANEL DE PREGUNTAS FRECUENTES (DESPUÉS DE INFORMACIÓN Y ANTES DE STOCK) -->
+      {companyFaqs.length > 0 && (
+        <section class="bottom-card faq-card">
+          <div class="bottom-card-header">
+            <div class="bottom-card-title-group">
+              <div class="bottom-card-title">
+                <HelpCircle size={18} class="section-icon" />
+                <h3>Preguntas frecuentes</h3>
+              </div>
+              <p class="faq-card-subtitle">
+                Información comercial y procesos de {company?.nombre || 'la empresa'}.
+              </p>
+            </div>
+          </div>
+
+          <div class="faq-accordion-stack">
+            {companyFaqs.map((faq) => (
+              <details class="faq-item" name="faq-group">
+                <summary class="faq-summary">
+                  <span class="faq-question">{faq.pregunta}</span>
+                  <ChevronDown size={18} class="faq-chevron" />
+                </summary>
+                <div class="faq-answer-body" set:html={faq.respuesta} />
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- PANEL DE STOCK DISPONIBLE (IDs SUBIDOS A SIGI) -->
       {hasStockImage && (
         <section class="bottom-card stock-panel">
           <div class="bottom-card-header">
@@ -329,11 +370,11 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
               <p class="stock-panel-subtitle">
                 <AlertTriangle size={14} class="subtitle-alert-icon" />
                 <span>
-                  <strong>Importante:</strong> esta imagen no muestra todas las propiedades disponibles. Para consultar el stock completo y actualizado, haz clic en “Ver Stock” o “Ver Drive”.
+                  <strong>Importante:</strong> este panel no muestra todas las propiedades disponibles. Para consultar el stock completo y actualizado, haz clic en “Ver Stock” o “Ver Drive”.
                 </span>
               </p>
             </div>
-          
+
             <button 
               type="button" 
               id="btn-open-stock-modal" 
@@ -378,12 +419,11 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
     </article>
   </main>
 
-  <!-- MODAL / LIGHTBOX DE STOCK CON ZOOM Y ARRASTRE -->
+  <!-- MODAL / LIGHTBOX DE STOCK -->
   {hasStockImage && (
     <div id="stock-modal" class="stock-modal hidden" role="dialog" aria-modal="true" aria-label="Visor de stock">
       <div class="modal-backdrop" id="modal-backdrop"></div>
 
-      <!-- BARRA DE HERRAMIENTAS SUPERIOR -->
       <div class="modal-toolbar">
         <div class="modal-controls">
           <button type="button" id="btn-zoom-out" class="control-btn" title="Alejar (-)">
@@ -403,7 +443,6 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
         </button>
       </div>
 
-      <!-- ÁREA DE VISUALIZACIÓN -->
       <div class="modal-viewport" id="modal-viewport">
         <img 
           id="modal-stock-img" 
@@ -1104,5 +1143,116 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
     -webkit-user-drag: none;
     transform-origin: center center;
     will-change: transform;
+  }
+  /* PANEL DE FAQS */
+  .faq-card-subtitle {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+
+  .faq-accordion-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .faq-item {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: #ffffff;
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .faq-item[open] {
+    border-color: var(--color-remax-blue);
+    box-shadow: 0 2px 8px rgba(0, 61, 165, 0.06);
+  }
+
+  .faq-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1.15rem;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .faq-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-summary:hover {
+    background-color: #f8fafc;
+    color: var(--color-remax-blue);
+  }
+
+  .faq-chevron {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .faq-item[open] .faq-chevron {
+    transform: rotate(180deg);
+    color: var(--color-remax-blue);
+  }
+
+  /* CUERPO DE LA RESPUESTA */
+  .faq-answer-body {
+    padding: 0.75rem 1.15rem 1rem 1.15rem;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #334155;
+    border-top: 1px dashed var(--color-border);
+  }
+
+  /* ESTILOS INYECTADOS CON :global() */
+  .faq-answer-body :global(p) {
+    margin-bottom: 0.5rem;
+  }
+
+  .faq-answer-body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .faq-answer-body :global(ul) {
+    list-style-type: disc !important;
+    list-style-position: outside !important;
+    margin: 0.5rem 0 0.75rem 0 !important;
+    padding-left: 1.5rem !important; /* Sangría visible garantizada */
+  }
+
+  .faq-answer-body :global(li) {
+    color: #334155;
+    margin-bottom: 0.4rem;
+    padding-left: 0.25rem;
+    line-height: 1.5;
+  }
+
+  .faq-answer-body :global(li::marker) {
+    color: var(--color-remax-blue);
+    font-size: 0.9em;
+  }
+
+  .faq-answer-body :global(li:last-child) {
+    margin-bottom: 0;
+  }
+
+  .faq-answer-body :global(.faq-callout) {
+    margin-top: 0.65rem;
+    background-color: #fff7ed;
+    border-left: 3px solid #ea580c;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-size: 0.82rem;
+    color: #9a3412;
   }
 </style>
