@@ -21,7 +21,7 @@ export const COMPANY_DRIVE_TUTORIALS: Record<string, Tutorial> = {
   'c-edifica-inversiones-del-sur-sac': {
     id: 'drive-edifica',
     titulo: '¿Cómo usar el Drive de Edifica?',
-    youtubeId: 'lrm9pKbHU-o'
+    youtubeId: ''
   },
   'c-grupo-tyc': {
     id: 'drive-tyc',
