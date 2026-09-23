@@ -29,6 +29,17 @@ const companiesSorted = companies
 const aniosUnicos = Array.from(
   new Set(activeProjects.map((p) => p.fechaEntrega?.anio).filter((a): a is number => typeof a === 'number'))
 ).sort((a, b) => a - b);
+
+// Detección automática del rango de precios
+const preciosValidos = activeProjects
+  .map((p) => {
+    const pr = (p as any).precio ?? (p as any).precioDesde ?? (p as any).precioMin;
+    return typeof pr === 'number' ? pr : parseFloat(String(pr || '0'));
+  })
+  .filter((p) => !isNaN(p) && p > 0);
+
+const minPrecioDetectado = preciosValidos.length > 0 ? Math.min(...preciosValidos) : 100000;
+const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValidos) : 1500000;
 ---
 
 <BaseLayout title="Remax Family Proyectos">
@@ -39,7 +50,9 @@ const aniosUnicos = Array.from(
       <FilterBar 
         distritos={distritosUnicos} 
         aniosEntrega={aniosUnicos} 
-        companies={companiesSorted} 
+        companies={companiesSorted}
+        minPrecio={minPrecioDetectado}
+        maxPrecio={maxPrecioDetectado}
       />
 
       <section class="catalog-content">
@@ -67,7 +80,7 @@ const aniosUnicos = Array.from(
           <div id="chips-list" class="chips-list"></div>
         </div>
 
-        <!-- ESTADO SIN RESULTADOS CON ICONO LUCIDE -->
+        <!-- ESTADO SIN RESULTADOS -->
         <div id="no-results" class="no-results hidden">
           <div class="no-results-box">
             <SearchX size={44} class="no-results-icon" stroke-width={1.5} />
@@ -90,7 +103,6 @@ const aniosUnicos = Array.from(
     </div>
   </main>
 
-  <!-- BOTÓN VOLVER ARRIBA CON ARROW-UP -->
   <button type="button" id="btn-back-to-top" class="back-to-top-btn hidden" aria-label="Volver arriba">
     <ArrowUp size={16} stroke-width={2.5} />
     <span>Volver arriba</span>
@@ -105,10 +117,10 @@ const aniosUnicos = Array.from(
     const distritoSelect = document.getElementById('filter-distrito') as HTMLSelectElement | null;
     const empresaSelect = document.getElementById('filter-empresa') as HTMLSelectElement | null;
     const etapaSelect = document.getElementById('filter-etapa') as HTMLSelectElement | null;
+    
+    // Sliders
     const precioMinInput = document.getElementById('filter-precio-min') as HTMLInputElement | null;
     const precioMaxInput = document.getElementById('filter-precio-max') as HTMLInputElement | null;
-    
-    // Sliders de rango
     const anioMinInput = document.getElementById('filter-anio-min') as HTMLInputElement | null;
     const anioMaxInput = document.getElementById('filter-anio-max') as HTMLInputElement | null;
     
@@ -128,13 +140,11 @@ const aniosUnicos = Array.from(
 
     const CURRENT_YEAR = new Date().getFullYear();
 
-    // 1. Prevenir submit recargando página si ya estamos en el catálogo
     searchForm?.addEventListener('submit', (e) => {
       e.preventDefault();
       applyFiltersAndSort();
     });
 
-    // 2. Cargar parámetro ?q= desde la URL (si vino redirigido)
     const urlParams = new URLSearchParams(window.location.search);
     const initialQuery = urlParams.get('q');
     if (initialQuery && searchInput) {
@@ -146,7 +156,6 @@ const aniosUnicos = Array.from(
       chipsList.innerHTML = '';
       const chips: { label: string; clear: () => void }[] = [];
 
-      // Chip de búsqueda por texto
       if (searchInput?.value.trim()) {
         chips.push({
           label: `Búsqueda: "${searchInput.value.trim()}"`,
@@ -157,7 +166,7 @@ const aniosUnicos = Array.from(
       if (distritoSelect?.value) {
         const text = distritoSelect.options[distritoSelect.selectedIndex].text;
         chips.push({
-          label: `Distrito: ${text}`,
+          label: `${text}`,
           clear: () => { distritoSelect.value = ''; applyFiltersAndSort(); }
         });
       }
@@ -165,7 +174,7 @@ const aniosUnicos = Array.from(
       if (empresaSelect?.value) {
         const text = empresaSelect.options[empresaSelect.selectedIndex].text;
         chips.push({
-          label: `Empresa: ${text}`,
+          label: `${text}`,
           clear: () => { empresaSelect.value = ''; applyFiltersAndSort(); }
         });
       }
@@ -173,30 +182,48 @@ const aniosUnicos = Array.from(
       if (etapaSelect?.value) {
         const text = etapaSelect.options[etapaSelect.selectedIndex].text;
         chips.push({
-          label: `Etapa: ${text}`,
+          label: `${text}`,
           clear: () => { etapaSelect.value = ''; applyFiltersAndSort(); }
         });
       }
 
-      if (precioMinInput?.value) {
-        chips.push({
-          label: `Desde S/ ${Number(precioMinInput.value).toLocaleString('es-PE')}`,
-          clear: () => { precioMinInput.value = ''; applyFiltersAndSort(); }
-        });
+      // CHIP PRECIO MÍNIMO: Solo si es mayor al mínimo original
+      if (precioMinInput) {
+        const val = parseFloat(precioMinInput.value);
+        const minLimit = parseFloat(precioMinInput.min);
+        if (!isNaN(val) && !isNaN(minLimit) && val > minLimit) {
+          chips.push({
+            label: `Desde S/ ${val.toLocaleString('es-PE')}`,
+            clear: () => {
+              precioMinInput.value = precioMinInput.min;
+              precioMinInput.dispatchEvent(new Event('input', { bubbles: true }));
+              applyFiltersAndSort();
+            }
+          });
+        }
       }
 
-      if (precioMaxInput?.value) {
-        chips.push({
-          label: `Hasta S/ ${Number(precioMaxInput.value).toLocaleString('es-PE')}`,
-          clear: () => { precioMaxInput.value = ''; applyFiltersAndSort(); }
-        });
+      // CHIP PRECIO MÁXIMO: Solo si es menor al máximo original
+      if (precioMaxInput) {
+        const val = parseFloat(precioMaxInput.value);
+        const maxLimit = parseFloat(precioMaxInput.max);
+        if (!isNaN(val) && !isNaN(maxLimit) && val < maxLimit) {
+          chips.push({
+            label: `Hasta S/ ${val.toLocaleString('es-PE')}`,
+            clear: () => {
+              precioMaxInput.value = precioMaxInput.max;
+              precioMaxInput.dispatchEvent(new Event('input', { bubbles: true }));
+              applyFiltersAndSort();
+            }
+          });
+        }
       }
 
-      // CHIP AÑO MÍNIMO: Solo si el usuario subió el slider respecto al mínimo base
+      // CHIP AÑO MÍNIMO
       if (anioMinInput) {
         const val = parseInt(anioMinInput.value, 10);
         const minLimit = parseInt(anioMinInput.min, 10);
-        if (!isNaN(val) && (isNaN(minLimit) || val > minLimit)) {
+        if (!isNaN(val) && !isNaN(minLimit) && val > minLimit) {
           chips.push({
             label: `Entrega desde: ${val}`,
             clear: () => {
@@ -208,11 +235,11 @@ const aniosUnicos = Array.from(
         }
       }
 
-      // CHIP AÑO MÁXIMO: Solo si el usuario bajó el slider respecto al máximo base
+      // CHIP AÑO MÁXIMO
       if (anioMaxInput) {
         const val = parseInt(anioMaxInput.value, 10);
         const maxLimit = parseInt(anioMaxInput.max, 10);
-        if (!isNaN(val) && (isNaN(maxLimit) || val < maxLimit)) {
+        if (!isNaN(val) && !isNaN(maxLimit) && val < maxLimit) {
           chips.push({
             label: `Entrega hasta: ${val}`,
             clear: () => {
@@ -226,7 +253,7 @@ const aniosUnicos = Array.from(
 
       roomCheckboxes.forEach((cb) => {
         if (cb.checked) {
-          const labelText = cb.value === '0' ? 'Oficina/Otros' : (cb.value === '4' ? '4+ hab' : `${cb.value} hab`);
+          const labelText = cb.value === '0' ? 'Oficina / Local / Otros' : (cb.value === '1' ? '1 habitacion' : `${cb.value} habitaciones`);
           chips.push({
             label: labelText,
             clear: () => { cb.checked = false; applyFiltersAndSort(); }
@@ -271,9 +298,7 @@ const aniosUnicos = Array.from(
         }
 
         if (sortMode === 'entrega-asc') {
-          if (entregaA !== entregaB) {
-            return entregaA - entregaB;
-          }
+          if (entregaA !== entregaB) return entregaA - entregaB;
           return distritoA.localeCompare(distritoB, 'es', { sensitivity: 'base' });
         }
 
@@ -286,15 +311,31 @@ const aniosUnicos = Array.from(
       const distritoVal = distritoSelect?.value.toLowerCase() || '';
       const empresaVal = empresaSelect?.value.toLowerCase() || '';
       const etapaVal = etapaSelect?.value || '';
-      const precioMinVal = precioMinInput?.value ? parseFloat(precioMinInput.value) : null;
-      const precioMaxVal = precioMaxInput?.value ? parseFloat(precioMaxInput.value) : null;
 
-      // Evaluar si los sliders de año están realmente filtrando
+      // Filtro de precio activo solo si difiere de los límites extremos
+      let precioMinVal: number | null = null;
+      if (precioMinInput) {
+        const val = parseFloat(precioMinInput.value);
+        const minLimit = parseFloat(precioMinInput.min);
+        if (!isNaN(val) && !isNaN(minLimit) && val > minLimit) {
+          precioMinVal = val;
+        }
+      }
+
+      let precioMaxVal: number | null = null;
+      if (precioMaxInput) {
+        const val = parseFloat(precioMaxInput.value);
+        const maxLimit = parseFloat(precioMaxInput.max);
+        if (!isNaN(val) && !isNaN(maxLimit) && val < maxLimit) {
+          precioMaxVal = val;
+        }
+      }
+
       let anioMinVal: number | null = null;
       if (anioMinInput) {
         const val = parseInt(anioMinInput.value, 10);
         const minLimit = parseInt(anioMinInput.min, 10);
-        if (!isNaN(val) && (isNaN(minLimit) || val > minLimit)) {
+        if (!isNaN(val) && !isNaN(minLimit) && val > minLimit) {
           anioMinVal = val;
         }
       }
@@ -303,7 +344,7 @@ const aniosUnicos = Array.from(
       if (anioMaxInput) {
         const val = parseInt(anioMaxInput.value, 10);
         const maxLimit = parseInt(anioMaxInput.max, 10);
-        if (!isNaN(val) && (isNaN(maxLimit) || val < maxLimit)) {
+        if (!isNaN(val) && !isNaN(maxLimit) && val < maxLimit) {
           anioMaxVal = val;
         }
       }
@@ -391,10 +432,17 @@ const aniosUnicos = Array.from(
       if (distritoSelect) distritoSelect.value = '';
       if (empresaSelect) empresaSelect.value = '';
       if (etapaSelect) etapaSelect.value = '';
-      if (precioMinInput) precioMinInput.value = '';
-      if (precioMaxInput) precioMaxInput.value = '';
       
-      // Resetear sliders a sus posiciones extremas
+      // Asignar al límite respectivo, nunca cadena vacía ''
+      if (precioMinInput) {
+        precioMinInput.value = precioMinInput.min;
+        precioMinInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      if (precioMaxInput) {
+        precioMaxInput.value = precioMaxInput.max;
+        precioMaxInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+
       if (anioMinInput) {
         anioMinInput.value = anioMinInput.min;
         anioMinInput.dispatchEvent(new Event('input', { bubbles: true }));
@@ -414,15 +462,13 @@ const aniosUnicos = Array.from(
       applyFiltersAndSort();
     }
 
-    // Listeners en tiempo real
     searchInput?.addEventListener('input', applyFiltersAndSort);
     distritoSelect?.addEventListener('change', applyFiltersAndSort);
     empresaSelect?.addEventListener('change', applyFiltersAndSort);
     etapaSelect?.addEventListener('change', applyFiltersAndSort);
+
     precioMinInput?.addEventListener('input', applyFiltersAndSort);
     precioMaxInput?.addEventListener('input', applyFiltersAndSort);
-
-    // Eventos 'input' para los range sliders (actualizan mientras se arrastra)
     anioMinInput?.addEventListener('input', applyFiltersAndSort);
     anioMaxInput?.addEventListener('input', applyFiltersAndSort);
 

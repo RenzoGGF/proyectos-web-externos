@@ -6,15 +6,30 @@ interface Props {
   distritos: string[];
   aniosEntrega: number[];
   companies: Company[];
+  minPrecio?: number;
+  maxPrecio?: number;
 }
 
-const { distritos, aniosEntrega, companies } = Astro.props;
+const { 
+  distritos, 
+  aniosEntrega, 
+  companies, 
+  minPrecio = 100000, 
+  maxPrecio = 1300000 
+} = Astro.props;
 
-// Calcular año mínimo y máximo para el range slider
+// 1. Configuración Año
 const currentYear = new Date().getFullYear();
 const sortedAnios = [...new Set(aniosEntrega)].filter(Boolean).sort((a, b) => a - b);
 const minYear = sortedAnios.length > 0 ? sortedAnios[0] : currentYear;
 const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : minYear + 4;
+
+// 2. Configuración Precio
+const stepPrecio = 50000;
+const minPriceRounded = Math.floor(minPrecio / stepPrecio) * stepPrecio;
+const maxPriceRounded = Math.ceil(maxPrecio / stepPrecio) * stepPrecio;
+
+const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
 ---
 
 <aside class="filter-sidebar">
@@ -56,30 +71,62 @@ const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : m
           </select>
         </div>
 
-        <!-- 3. Rango de Precios -->
+        <!-- 3. Rango de Precios (Slider Shadcn con Tooltips Fijos) -->
         <div class="filter-group">
           <label class="filter-label">Precio (S/)</label>
-          <div class="range-inputs">
-            <input type="number" id="filter-precio-min" class="filter-input" placeholder="Mínimo" step="10000" min="0" />
-            <span class="range-separator">-</span>
-            <input type="number" id="filter-precio-max" class="filter-input" placeholder="Máximo" step="10000" min="0" />
+
+          <div class="shadcn-slider-root" id="slider-precio-root">
+            <div class="shadcn-slider-track">
+              <div class="shadcn-slider-range" id="precio-slider-range"></div>
+            </div>
+
+            <!-- Tooltips flotantes permanentes -->
+            <div id="tooltip-precio-min" class="shadcn-tooltip" aria-hidden="true">{formatSoles(minPriceRounded)}</div>
+            <div id="tooltip-precio-max" class="shadcn-tooltip" aria-hidden="true">{formatSoles(maxPriceRounded)}</div>
+
+            <!-- Inputs nativos del Range dual -->
+            <input
+              type="range"
+              id="filter-precio-min"
+              name="filter-precio-min"
+              min={minPriceRounded}
+              max={maxPriceRounded}
+              value={minPriceRounded}
+              step={stepPrecio}
+              class="shadcn-slider-thumb-input"
+              aria-label="Precio mínimo en soles"
+            />
+            <input
+              type="range"
+              id="filter-precio-max"
+              name="filter-precio-max"
+              min={minPriceRounded}
+              max={maxPriceRounded}
+              value={maxPriceRounded}
+              step={stepPrecio}
+              class="shadcn-slider-thumb-input"
+              aria-label="Precio máximo en soles"
+            />
+          </div>
+
+          <div class="range-ticks">
+            <span>{formatSoles(minPriceRounded)}</span>
+            <span>{formatSoles(maxPriceRounded)}</span>
           </div>
         </div>
 
-        <!-- 4. Rango de Entrega (Range Slider con Tooltips Permanentes) -->
+        <!-- 4. Rango de Entrega (Slider Shadcn con Tooltips Fijos) -->
         <div class="filter-group">
           <label class="filter-label">Año de Entrega</label>
 
-          <div class="shadcn-slider-root" id="slider-root">
+          <div class="shadcn-slider-root" id="slider-anio-root">
             <div class="shadcn-slider-track">
               <div class="shadcn-slider-range" id="anio-slider-range"></div>
             </div>
 
-            <!-- Tooltips flotantes permanentes -->
             <div id="tooltip-anio-min" class="shadcn-tooltip" aria-hidden="true">{minYear}</div>
             <div id="tooltip-anio-max" class="shadcn-tooltip" aria-hidden="true">{maxYear}</div>
 
-            <!-- Inputs nativos del Range dual -->
             <input
               type="range"
               id="filter-anio-min"
@@ -156,107 +203,124 @@ const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : m
       }
     });
 
-    // Control del Slider y Tooltips
-    const minInput = document.getElementById('filter-anio-min') as HTMLInputElement | null;
-    const maxInput = document.getElementById('filter-anio-max') as HTMLInputElement | null;
-    const rangeBar = document.getElementById('anio-slider-range');
-    const tooltipMin = document.getElementById('tooltip-anio-min');
-    const tooltipMax = document.getElementById('tooltip-anio-max');
+    // ============================================
+    // CONTROLADOR GENÉRICO DE DUAL RANGE SLIDERS
+    // ============================================
+    function setupDualSlider(config: {
+      minInputId: string;
+      maxInputId: string;
+      rangeBarId: string;
+      tooltipMinId: string;
+      tooltipMaxId: string;
+      formatFn: (v: number) => string;
+    }) {
+      const minInput = document.getElementById(config.minInputId) as HTMLInputElement | null;
+      const maxInput = document.getElementById(config.maxInputId) as HTMLInputElement | null;
+      const rangeBar = document.getElementById(config.rangeBarId);
+      const tooltipMin = document.getElementById(config.tooltipMinId);
+      const tooltipMax = document.getElementById(config.tooltipMaxId);
 
-    function updateYearSlider(event?: Event) {
-      if (!minInput || !maxInput || !rangeBar) return;
+      if (!minInput || !maxInput || !rangeBar) return { update: () => {}, reset: () => {} };
 
-      let minVal = parseInt(minInput.value, 10);
-      let maxVal = parseInt(maxInput.value, 10);
-      const minLimit = parseInt(minInput.min, 10);
-      const maxLimit = parseInt(minInput.max, 10);
-      const totalSpan = maxLimit - minLimit || 1;
+      function update(event?: Event) {
+        if (!minInput || !maxInput || !rangeBar) return;
 
-      // Evitar cruces entre thumbs
-      if (minVal > maxVal) {
-        if (event?.target === minInput) {
-          minInput.value = String(maxVal);
-          minVal = maxVal;
+        let minVal = parseFloat(minInput.value);
+        let maxVal = parseFloat(maxInput.value);
+        const minLimit = parseFloat(minInput.min);
+        const maxLimit = parseFloat(minInput.max);
+        const totalSpan = maxLimit - minLimit || 1;
+
+        if (minVal > maxVal) {
+          if (event?.target === minInput) {
+            minInput.value = String(maxVal);
+            minVal = maxVal;
+          } else {
+            maxInput.value = String(minVal);
+            maxVal = minVal;
+          }
+        }
+
+        const percentMin = ((minVal - minLimit) / totalSpan) * 100;
+        const percentMax = ((maxVal - minLimit) / totalSpan) * 100;
+
+        rangeBar.style.left = `${percentMin}%`;
+        rangeBar.style.width = `${percentMax - percentMin}%`;
+
+        if (tooltipMin) {
+          tooltipMin.textContent = config.formatFn(minVal);
+          tooltipMin.style.left = `calc(${percentMin}% + ${9 - percentMin * 0.18}px)`;
+        }
+        if (tooltipMax) {
+          tooltipMax.textContent = config.formatFn(maxVal);
+          tooltipMax.style.left = `calc(${percentMax}% + ${9 - percentMax * 0.18}px)`;
+        }
+
+        if (minVal > maxLimit - totalSpan * 0.12) {
+          minInput.style.zIndex = '5';
+          if (tooltipMin) tooltipMin.style.zIndex = '12';
+          if (tooltipMax) tooltipMax.style.zIndex = '11';
         } else {
-          maxInput.value = String(minVal);
-          maxVal = minVal;
+          minInput.style.zIndex = '3';
+          if (tooltipMin) tooltipMin.style.zIndex = '11';
+          if (tooltipMax) tooltipMax.style.zIndex = '12';
         }
       }
 
-      // Porcentajes para posicionamiento
-      const percentMin = ((minVal - minLimit) / totalSpan) * 100;
-      const percentMax = ((maxVal - minLimit) / totalSpan) * 100;
-
-      // Actualizar barra de rango seleccionada
-      rangeBar.style.left = `${percentMin}%`;
-      rangeBar.style.width = `${percentMax - percentMin}%`;
-
-      // Posicionamiento de tooltips compensando el centro del thumb (18px)
-      if (tooltipMin) {
-        tooltipMin.textContent = String(minVal);
-        tooltipMin.style.left = `calc(${percentMin}% + ${9 - percentMin * 0.18}px)`;
-      }
-      if (tooltipMax) {
-        tooltipMax.textContent = String(maxVal);
-        tooltipMax.style.left = `calc(${percentMax}% + ${9 - percentMax * 0.18}px)`;
-      }
-
-      // Priorizar z-index del thumb y tooltip cuando se acercan al extremo superior
-      if (minVal > maxLimit - (totalSpan * 0.1)) {
-        minInput.style.zIndex = '5';
-        if (tooltipMin) tooltipMin.style.zIndex = '12';
-        if (tooltipMax) tooltipMax.style.zIndex = '11';
-      } else {
-        minInput.style.zIndex = '3';
-        if (tooltipMin) tooltipMin.style.zIndex = '11';
-        if (tooltipMax) tooltipMax.style.zIndex = '12';
-      }
-    }
-
-    minInput?.addEventListener('input', (e) => {
-      updateYearSlider(e);
-      syncActiveClasses();
-    });
-
-    maxInput?.addEventListener('input', (e) => {
-      updateYearSlider(e);
-      syncActiveClasses();
-    });
-
-    function resetYearSlider() {
-      if (minInput && maxInput) {
+      function reset() {
+        if (!minInput || !maxInput) return;
         minInput.value = minInput.min;
         maxInput.value = maxInput.max;
-        updateYearSlider();
+        update();
       }
+
+      minInput.addEventListener('input', update);
+      maxInput.addEventListener('input', update);
+
+      update();
+      return { update, reset };
     }
 
-    // Sincronización de clases activas
-    const selects = document.querySelectorAll<HTMLSelectElement>('.filter-select');
-    const inputs = document.querySelectorAll<HTMLInputElement>('.filter-input');
+    // Inicializar Slider de Precios
+    const priceSlider = setupDualSlider({
+      minInputId: 'filter-precio-min',
+      maxInputId: 'filter-precio-max',
+      rangeBarId: 'precio-slider-range',
+      tooltipMinId: 'tooltip-precio-min',
+      tooltipMaxId: 'tooltip-precio-max',
+      formatFn: (val) => `S/ ${val.toLocaleString('es-PE')}`,
+    });
 
+    // Inicializar Slider de Años
+    const yearSlider = setupDualSlider({
+      minInputId: 'filter-anio-min',
+      maxInputId: 'filter-anio-max',
+      rangeBarId: 'anio-slider-range',
+      tooltipMinId: 'tooltip-anio-min',
+      tooltipMaxId: 'tooltip-anio-max',
+      formatFn: (val) => String(val),
+    });
+
+    // Sincronización de clases visuales en selects
+    const selects = document.querySelectorAll<HTMLSelectElement>('.filter-select');
     function syncActiveClasses() {
       selects.forEach((sel) => sel.classList.toggle('is-active', sel.value !== ''));
-      inputs.forEach((inp) => inp.classList.toggle('is-active', inp.value.trim() !== ''));
     }
-
     selects.forEach((sel) => sel.addEventListener('change', syncActiveClasses));
-    inputs.forEach((inp) => inp.addEventListener('input', syncActiveClasses));
 
-    // Monitorear reseteos únicamente en los botones de reseteo (evitando los chips)
+    // Reseteos desde botones específicos
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement | null;
       if (
         target?.closest('#btn-reset-filters') || 
         target?.closest('#btn-no-results-reset')
       ) {
-        resetYearSlider();
+        priceSlider.reset();
+        yearSlider.reset();
         setTimeout(syncActiveClasses, 10);
       }
     });
 
-    // Iniciar posiciones iniciales
-    updateYearSlider();
     syncActiveClasses();
   });
 </script>
@@ -366,20 +430,8 @@ const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : m
     color: var(--color-text-muted);
   }
 
-  .range-inputs {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
-
-  .range-separator {
-    font-size: 0.85rem;
-    color: var(--color-text-muted);
-    font-weight: 700;
-  }
-
   /* ========================================= */
-  /* RANGE SLIDER & TOOLTIPS (SHADCN/UI STYLE) */
+  /* RANGE SLIDERS & TOOLTIPS (SHADCN/UI STYLE)*/
   /* ========================================= */
   .shadcn-slider-root {
     position: relative;
@@ -389,15 +441,14 @@ const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : m
     align-items: center;
     user-select: none;
     touch-action: none;
-    margin-top: 1.5rem; /* Margen superior para los tooltips siempre visibles */
+    margin-top: 1.6rem; /* Espacio para los tooltips siempre visibles */
   }
 
-  /* Tooltip Flotante Permanente */
   .shadcn-tooltip {
     position: absolute;
     bottom: calc(100% + 5px);
     transform: translateX(-50%);
-    background-color: #0f172a; /* Slate 900 de shadcn */
+    background-color: #0f172a; /* Slate 900 */
     color: #f8fafc;
     font-size: 0.68rem;
     font-weight: 700;
@@ -408,10 +459,10 @@ const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : m
     pointer-events: none;
     opacity: 1;
     visibility: visible;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
     z-index: 10;
   }
 
-  /* Flecha indicadora en la base del tooltip */
   .shadcn-tooltip::after {
     content: '';
     position: absolute;
@@ -423,7 +474,6 @@ const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : m
     border-color: #0f172a transparent transparent transparent;
   }
 
-  /* Track / Riel base */
   .shadcn-slider-track {
     position: relative;
     width: 100%;
@@ -433,7 +483,6 @@ const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : m
     overflow: hidden;
   }
 
-  /* Barra de rango seleccionada */
   .shadcn-slider-range {
     position: absolute;
     height: 100%;
@@ -441,7 +490,6 @@ const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : m
     border-radius: 9999px;
   }
 
-  /* Inputs nativos del Range */
   .shadcn-slider-thumb-input {
     position: absolute;
     top: 0;
@@ -530,8 +578,8 @@ const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : m
     padding: 0 2px;
   }
 
-  /* ESTILOS DE SELECTS E INPUTS BASE */
-  .filter-select, .filter-input {
+  /* SELECTS E INPUTS BASE */
+  .filter-select {
     width: 100%;
     padding: 0.45rem 0.6rem;
     font-size: 0.85rem;
@@ -540,10 +588,6 @@ const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : m
     border-radius: var(--radius-md);
     background-color: #ffffff;
     outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
-  }
-
-  .filter-select {
     appearance: none;
     -webkit-appearance: none;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -553,6 +597,7 @@ const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : m
     padding-right: 2rem;
     cursor: pointer;
     color: var(--color-text-muted);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .filter-select option {
@@ -564,19 +609,8 @@ const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : m
     color: var(--color-text-muted);
   }
 
-  .filter-input {
-    color: var(--color-text-main);
-  }
-
-  .filter-input::placeholder {
-    color: var(--color-text-muted);
-    opacity: 0.8;
-  }
-
   .filter-select.is-active,
-  .filter-select:not(:has(option[value=""]:checked)),
-  .filter-input.is-active,
-  .filter-input:not(:placeholder-shown) {
+  .filter-select:not(:has(option[value=""]:checked)) {
     border-color: var(--color-remax-blue);
     box-shadow: 0 0 0 1px var(--color-remax-blue);
     background-color: #f8faff;
@@ -584,8 +618,7 @@ const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : m
     font-weight: 600;
   }
 
-  .filter-select:focus, 
-  .filter-input:focus {
+  .filter-select:focus {
     border-color: var(--color-remax-blue);
     box-shadow: 0 0 0 3px rgba(0, 61, 165, 0.15);
     background-color: #ffffff;
