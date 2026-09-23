@@ -25,7 +25,7 @@ const minYear = sortedAnios.length > 0 ? sortedAnios[0] : currentYear;
 const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : minYear + 4;
 
 // Configuración Precio
-const stepPrecio = 10000;
+const stepPrecio = 50000;
 const minPriceRounded = Math.floor(minPrecio / stepPrecio) * stepPrecio;
 const maxPriceCalculated = Math.ceil(maxPrecio / stepPrecio) * stepPrecio;
 const maxPriceRounded = maxPriceCalculated <= minPriceRounded ? minPriceRounded + stepPrecio * 10 : maxPriceCalculated;

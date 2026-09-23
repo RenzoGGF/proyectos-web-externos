@@ -11,7 +11,6 @@ export const GENERAL_TUTORIAL: Tutorial = {
   youtubeId: 'Ol3r5ykgjks'
 };
 
-// Tutoriales de Drive por empresa (identificados por empresaId en minúsculas)
 export const COMPANY_DRIVE_TUTORIALS: Record<string, Tutorial> = {
   'c-ter': {
     id: 'drive-ter',
