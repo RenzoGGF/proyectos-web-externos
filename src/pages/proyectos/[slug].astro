@@ -26,7 +26,7 @@ import {
   X,
   HelpCircle,
   ChevronDown,
-  Lightbulb
+  Info
 } from 'lucide-astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
@@ -334,7 +334,7 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
               </a>
             )}
 
-            <!-- BADGE TUTORIAL DRIVE CON PUNTO ANIMADO -->
+            <!-- BADGE TUTORIAL DRIVE ULTRACOMPACTO -->
             {driveTutorial && (
               <button 
                 type="button" 
@@ -343,8 +343,8 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
                 data-video-title={driveTutorial.titulo}
                 title={driveTutorial.titulo}
               >
-                <Lightbulb size={15} class="drive-badge-icon" />
-                <span>Mira cómo encontrar precios, planos y stock</span>
+                <Info size={16} strokeWidth={2.2} class="drive-badge-icon" />
+                <span class="drive-badge-text">Mira cómo encontrar precios, planos y stock</span>
                 <span class="point" aria-hidden="true"></span>
               </button>
             )}
