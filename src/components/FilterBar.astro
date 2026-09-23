@@ -15,19 +15,20 @@ const {
   aniosEntrega, 
   companies, 
   minPrecio = 100000, 
-  maxPrecio = 1300000 
+  maxPrecio = 1500000 
 } = Astro.props;
 
-// 1. Configuración Año
+// Configuración Año
 const currentYear = new Date().getFullYear();
 const sortedAnios = [...new Set(aniosEntrega)].filter(Boolean).sort((a, b) => a - b);
 const minYear = sortedAnios.length > 0 ? sortedAnios[0] : currentYear;
 const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : minYear + 4;
 
-// 2. Configuración Precio
-const stepPrecio = 50000;
+// Configuración Precio
+const stepPrecio = 10000;
 const minPriceRounded = Math.floor(minPrecio / stepPrecio) * stepPrecio;
-const maxPriceRounded = Math.ceil(maxPrecio / stepPrecio) * stepPrecio;
+const maxPriceCalculated = Math.ceil(maxPrecio / stepPrecio) * stepPrecio;
+const maxPriceRounded = maxPriceCalculated <= minPriceRounded ? minPriceRounded + stepPrecio * 10 : maxPriceCalculated;
 
 const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
 ---
@@ -71,7 +72,7 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
           </select>
         </div>
 
-        <!-- 3. Rango de Precios (Slider Shadcn con Tooltips Fijos) -->
+        <!-- 3. Rango de Precios -->
         <div class="filter-group">
           <label class="filter-label">Precio (S/)</label>
 
@@ -80,11 +81,9 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
               <div class="shadcn-slider-range" id="precio-slider-range"></div>
             </div>
 
-            <!-- Tooltips flotantes permanentes -->
             <div id="tooltip-precio-min" class="shadcn-tooltip" aria-hidden="true">{formatSoles(minPriceRounded)}</div>
             <div id="tooltip-precio-max" class="shadcn-tooltip" aria-hidden="true">{formatSoles(maxPriceRounded)}</div>
 
-            <!-- Inputs nativos del Range dual -->
             <input
               type="range"
               id="filter-precio-min"
@@ -115,7 +114,7 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
           </div>
         </div>
 
-        <!-- 4. Rango de Entrega (Slider Shadcn con Tooltips Fijos) -->
+        <!-- 4. Rango de Entrega -->
         <div class="filter-group">
           <label class="filter-label">Año de Entrega</label>
 
@@ -203,9 +202,6 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
       }
     });
 
-    // ============================================
-    // CONTROLADOR GENÉRICO DE DUAL RANGE SLIDERS
-    // ============================================
     function setupDualSlider(config: {
       minInputId: string;
       maxInputId: string;
@@ -222,6 +218,10 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
 
       if (!minInput || !maxInput || !rangeBar) return { update: () => {}, reset: () => {} };
 
+      let lastMinVal = parseFloat(minInput.value);
+      let lastMaxVal = parseFloat(maxInput.value);
+      let isTransferring = false;
+
       function update(event?: Event) {
         if (!minInput || !maxInput || !rangeBar) return;
 
@@ -231,15 +231,55 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
         const maxLimit = parseFloat(minInput.max);
         const totalSpan = maxLimit - minLimit || 1;
 
+        if (isNaN(minVal)) minVal = minLimit;
+        if (isNaN(maxVal)) maxVal = maxLimit;
+
+        // RESOLUCIÓN DE CRUCES Y RANGOS COLAPSADOS EN EL MISMO VALOR
         if (minVal > maxVal) {
           if (event?.target === minInput) {
-            minInput.value = String(maxVal);
-            minVal = maxVal;
+            // Si estaban juntos y se arrastró el selector mínimo hacia la derecha,
+            // se transfiere el valor al selector máximo
+            if (lastMinVal === lastMaxVal) {
+              maxInput.value = String(minVal);
+              minInput.value = String(lastMinVal);
+              maxVal = minVal;
+              minVal = lastMinVal;
+              if (!isTransferring) {
+                isTransferring = true;
+                maxInput.dispatchEvent(new Event('input', { bubbles: true }));
+                isTransferring = false;
+              }
+            } else {
+              minInput.value = String(maxVal);
+              minVal = maxVal;
+            }
+          } else if (event?.target === maxInput) {
+            // Si estaban juntos y se arrastró el selector máximo hacia la izquierda,
+            // se transfiere el valor al selector mínimo
+            if (lastMinVal === lastMaxVal) {
+              minInput.value = String(maxVal);
+              maxInput.value = String(lastMaxVal);
+              minVal = maxVal;
+              maxVal = lastMaxVal;
+              if (!isTransferring) {
+                isTransferring = true;
+                minInput.dispatchEvent(new Event('input', { bubbles: true }));
+                isTransferring = false;
+              }
+            } else {
+              maxInput.value = String(minVal);
+              maxVal = minVal;
+            }
           } else {
-            maxInput.value = String(minVal);
-            maxVal = minVal;
+            minInput.value = String(minLimit);
+            maxInput.value = String(maxLimit);
+            minVal = minLimit;
+            maxVal = maxLimit;
           }
         }
+
+        lastMinVal = minVal;
+        lastMaxVal = maxVal;
 
         const percentMin = ((minVal - minLimit) / totalSpan) * 100;
         const percentMax = ((maxVal - minLimit) / totalSpan) * 100;
@@ -256,21 +296,61 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
           tooltipMax.style.left = `calc(${percentMax}% + ${9 - percentMax * 0.18}px)`;
         }
 
-        if (minVal > maxLimit - totalSpan * 0.12) {
+        // PRIORIZACIÓN BASE DE Z-INDEX EN LOS EXTREMOS
+        if (minVal === maxVal) {
+          if (minVal === minLimit) {
+            maxInput.style.zIndex = '10';
+            minInput.style.zIndex = '5';
+          } else if (minVal === maxLimit) {
+            minInput.style.zIndex = '10';
+            maxInput.style.zIndex = '5';
+          }
+        } else if (minVal > maxLimit - totalSpan * 0.12) {
           minInput.style.zIndex = '5';
-          if (tooltipMin) tooltipMin.style.zIndex = '12';
-          if (tooltipMax) tooltipMax.style.zIndex = '11';
+          maxInput.style.zIndex = '3';
         } else {
           minInput.style.zIndex = '3';
-          if (tooltipMin) tooltipMin.style.zIndex = '11';
-          if (tooltipMax) tooltipMax.style.zIndex = '12';
+          maxInput.style.zIndex = '5';
         }
+      }
+
+      // GESTIÓN DINÁMICA DE Z-INDEX MEDIANTE PUNTERO (DESKTOP)
+      const root = minInput.closest('.shadcn-slider-root') as HTMLElement | null;
+      if (root) {
+        root.addEventListener('pointermove', (e: PointerEvent) => {
+          const minVal = parseFloat(minInput.value);
+          const maxVal = parseFloat(maxInput.value);
+          const minLimit = parseFloat(minInput.min);
+          const maxLimit = parseFloat(minInput.max);
+          const totalSpan = maxLimit - minLimit || 1;
+
+          // Si los selectores están juntos o muy cerca, y no en extremos absolutos
+          if (Math.abs(maxVal - minVal) / totalSpan < 0.06 && minVal > minLimit && minVal < maxLimit) {
+            const rect = root.getBoundingClientRect();
+            const cursorPercent = (e.clientX - rect.left) / rect.width;
+            const thumbPercent = (minVal - minLimit) / totalSpan;
+
+            if (cursorPercent < thumbPercent) {
+              minInput.style.zIndex = '10';
+              maxInput.style.zIndex = '5';
+              if (tooltipMin) tooltipMin.style.zIndex = '12';
+              if (tooltipMax) tooltipMax.style.zIndex = '11';
+            } else {
+              maxInput.style.zIndex = '10';
+              minInput.style.zIndex = '5';
+              if (tooltipMin) tooltipMin.style.zIndex = '11';
+              if (tooltipMax) tooltipMax.style.zIndex = '12';
+            }
+          }
+        });
       }
 
       function reset() {
         if (!minInput || !maxInput) return;
         minInput.value = minInput.min;
         maxInput.value = maxInput.max;
+        lastMinVal = parseFloat(minInput.min);
+        lastMaxVal = parseFloat(maxInput.max);
         update();
       }
 
@@ -281,7 +361,6 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
       return { update, reset };
     }
 
-    // Inicializar Slider de Precios
     const priceSlider = setupDualSlider({
       minInputId: 'filter-precio-min',
       maxInputId: 'filter-precio-max',
@@ -291,7 +370,6 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
       formatFn: (val) => `S/ ${val.toLocaleString('es-PE')}`,
     });
 
-    // Inicializar Slider de Años
     const yearSlider = setupDualSlider({
       minInputId: 'filter-anio-min',
       maxInputId: 'filter-anio-max',
@@ -301,23 +379,23 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
       formatFn: (val) => String(val),
     });
 
-    // Sincronización de clases visuales en selects
     const selects = document.querySelectorAll<HTMLSelectElement>('.filter-select');
     function syncActiveClasses() {
       selects.forEach((sel) => sel.classList.toggle('is-active', sel.value !== ''));
     }
     selects.forEach((sel) => sel.addEventListener('change', syncActiveClasses));
 
-    // Reseteos desde botones específicos
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement | null;
       if (
         target?.closest('#btn-reset-filters') || 
         target?.closest('#btn-no-results-reset')
       ) {
-        priceSlider.reset();
-        yearSlider.reset();
-        setTimeout(syncActiveClasses, 10);
+        setTimeout(() => {
+          priceSlider.reset();
+          yearSlider.reset();
+          syncActiveClasses();
+        }, 0);
       }
     });
 
@@ -430,9 +508,6 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
     color: var(--color-text-muted);
   }
 
-  /* ========================================= */
-  /* RANGE SLIDERS & TOOLTIPS (SHADCN/UI STYLE)*/
-  /* ========================================= */
   .shadcn-slider-root {
     position: relative;
     width: 100%;
@@ -441,14 +516,14 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
     align-items: center;
     user-select: none;
     touch-action: none;
-    margin-top: 1.6rem; /* Espacio para los tooltips siempre visibles */
+    margin-top: 1.6rem;
   }
 
   .shadcn-tooltip {
     position: absolute;
     bottom: calc(100% + 5px);
     transform: translateX(-50%);
-    background-color: #0f172a; /* Slate 900 */
+    background-color: #0f172a;
     color: #f8fafc;
     font-size: 0.68rem;
     font-weight: 700;
@@ -506,7 +581,6 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
     outline: none;
   }
 
-  /* Thumbs (Chrome, Safari, Edge) */
   .shadcn-slider-thumb-input::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
@@ -534,7 +608,6 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
     box-shadow: 0 0 0 3px rgba(0, 61, 165, 0.25);
   }
 
-  /* Thumbs (Firefox) */
   .shadcn-slider-thumb-input::-moz-range-thumb {
     width: 18px;
     height: 18px;
@@ -578,7 +651,6 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
     padding: 0 2px;
   }
 
-  /* SELECTS E INPUTS BASE */
   .filter-select {
     width: 100%;
     padding: 0.45rem 0.6rem;

@@ -253,7 +253,7 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
 
       roomCheckboxes.forEach((cb) => {
         if (cb.checked) {
-          const labelText = cb.value === '0' ? 'Oficina / Local / Otros' : (cb.value === '1' ? '1 habitacion' : `${cb.value} habitaciones`);
+          const labelText = cb.value === '0' ? 'Oficina / Local / Otros' : (cb.value === '1' ? '1 habitación' : `${cb.value} habitaciones`);
           chips.push({
             label: labelText,
             clear: () => { cb.checked = false; applyFiltersAndSort(); }
