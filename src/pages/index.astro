@@ -107,8 +107,11 @@ const aniosUnicos = Array.from(
     const etapaSelect = document.getElementById('filter-etapa') as HTMLSelectElement | null;
     const precioMinInput = document.getElementById('filter-precio-min') as HTMLInputElement | null;
     const precioMaxInput = document.getElementById('filter-precio-max') as HTMLInputElement | null;
-    const anioMinSelect = document.getElementById('filter-anio-min') as HTMLSelectElement | null;
-    const anioMaxSelect = document.getElementById('filter-anio-max') as HTMLSelectElement | null;
+    
+    // Sliders de rango
+    const anioMinInput = document.getElementById('filter-anio-min') as HTMLInputElement | null;
+    const anioMaxInput = document.getElementById('filter-anio-max') as HTMLInputElement | null;
+    
     const roomCheckboxes = document.querySelectorAll<HTMLInputElement>('input[name="filter-rooms"]');
     const sortSelect = document.getElementById('sort-select') as HTMLSelectElement | null;
 
@@ -189,18 +192,36 @@ const aniosUnicos = Array.from(
         });
       }
 
-      if (anioMinSelect?.value) {
-        chips.push({
-          label: `Entrega desde: ${anioMinSelect.value}`,
-          clear: () => { anioMinSelect.value = ''; applyFiltersAndSort(); }
-        });
+      // CHIP AÑO MÍNIMO: Solo si el usuario subió el slider respecto al mínimo base
+      if (anioMinInput) {
+        const val = parseInt(anioMinInput.value, 10);
+        const minLimit = parseInt(anioMinInput.min, 10);
+        if (!isNaN(val) && (isNaN(minLimit) || val > minLimit)) {
+          chips.push({
+            label: `Entrega desde: ${val}`,
+            clear: () => {
+              anioMinInput.value = anioMinInput.min;
+              anioMinInput.dispatchEvent(new Event('input', { bubbles: true }));
+              applyFiltersAndSort();
+            }
+          });
+        }
       }
 
-      if (anioMaxSelect?.value) {
-        chips.push({
-          label: `Entrega hasta: ${anioMaxSelect.value}`,
-          clear: () => { anioMaxSelect.value = ''; applyFiltersAndSort(); }
-        });
+      // CHIP AÑO MÁXIMO: Solo si el usuario bajó el slider respecto al máximo base
+      if (anioMaxInput) {
+        const val = parseInt(anioMaxInput.value, 10);
+        const maxLimit = parseInt(anioMaxInput.max, 10);
+        if (!isNaN(val) && (isNaN(maxLimit) || val < maxLimit)) {
+          chips.push({
+            label: `Entrega hasta: ${val}`,
+            clear: () => {
+              anioMaxInput.value = anioMaxInput.max;
+              anioMaxInput.dispatchEvent(new Event('input', { bubbles: true }));
+              applyFiltersAndSort();
+            }
+          });
+        }
       }
 
       roomCheckboxes.forEach((cb) => {
@@ -267,8 +288,25 @@ const aniosUnicos = Array.from(
       const etapaVal = etapaSelect?.value || '';
       const precioMinVal = precioMinInput?.value ? parseFloat(precioMinInput.value) : null;
       const precioMaxVal = precioMaxInput?.value ? parseFloat(precioMaxInput.value) : null;
-      const anioMinVal = anioMinSelect?.value ? parseInt(anioMinSelect.value, 10) : null;
-      const anioMaxSelectVal = anioMaxSelect?.value ? parseInt(anioMaxSelect.value, 10) : null;
+
+      // Evaluar si los sliders de año están realmente filtrando
+      let anioMinVal: number | null = null;
+      if (anioMinInput) {
+        const val = parseInt(anioMinInput.value, 10);
+        const minLimit = parseInt(anioMinInput.min, 10);
+        if (!isNaN(val) && (isNaN(minLimit) || val > minLimit)) {
+          anioMinVal = val;
+        }
+      }
+
+      let anioMaxVal: number | null = null;
+      if (anioMaxInput) {
+        const val = parseInt(anioMaxInput.value, 10);
+        const maxLimit = parseInt(anioMaxInput.max, 10);
+        if (!isNaN(val) && (isNaN(maxLimit) || val < maxLimit)) {
+          anioMaxVal = val;
+        }
+      }
 
       const selectedRooms: string[] = [];
       roomCheckboxes.forEach((cb) => {
@@ -290,9 +328,7 @@ const aniosUnicos = Array.from(
           .map((n) => parseInt(n, 10))
           .filter((n) => !isNaN(n));
 
-        // Filtro por Nombre
         const matchesNombre = !searchVal || cardNombre.includes(searchVal);
-
         const matchesDistrito = !distritoVal || cardDistrito === distritoVal;
         const matchesEmpresa = !empresaVal || cardEmpresa === empresaVal;
         const matchesEtapa = !etapaVal || cardEtapa === etapaVal;
@@ -308,7 +344,7 @@ const aniosUnicos = Array.from(
           matchesAnioMax = true;
         } else {
           matchesAnioMin = !anioMinVal || cardAnio >= anioMinVal;
-          matchesAnioMax = !anioMaxSelectVal || cardAnio <= anioMaxSelectVal;
+          matchesAnioMax = !anioMaxVal || cardAnio <= anioMaxVal;
         }
         const matchesAnio = matchesAnioMin && matchesAnioMax;
 
@@ -357,12 +393,20 @@ const aniosUnicos = Array.from(
       if (etapaSelect) etapaSelect.value = '';
       if (precioMinInput) precioMinInput.value = '';
       if (precioMaxInput) precioMaxInput.value = '';
-      if (anioMinSelect) anioMinSelect.value = '';
-      if (anioMaxSelect) anioMaxSelect.value = '';
+      
+      // Resetear sliders a sus posiciones extremas
+      if (anioMinInput) {
+        anioMinInput.value = anioMinInput.min;
+        anioMinInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      if (anioMaxInput) {
+        anioMaxInput.value = anioMaxInput.max;
+        anioMaxInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+
       if (sortSelect) sortSelect.value = 'distrito-asc';
       roomCheckboxes.forEach((cb) => (cb.checked = false));
       
-      // Limpiar URL param si existe
       if (window.location.search) {
         window.history.replaceState({}, '', window.location.pathname);
       }
@@ -370,16 +414,18 @@ const aniosUnicos = Array.from(
       applyFiltersAndSort();
     }
 
-    // Listener de búsqueda en tiempo real
+    // Listeners en tiempo real
     searchInput?.addEventListener('input', applyFiltersAndSort);
-
     distritoSelect?.addEventListener('change', applyFiltersAndSort);
     empresaSelect?.addEventListener('change', applyFiltersAndSort);
     etapaSelect?.addEventListener('change', applyFiltersAndSort);
     precioMinInput?.addEventListener('input', applyFiltersAndSort);
     precioMaxInput?.addEventListener('input', applyFiltersAndSort);
-    anioMinSelect?.addEventListener('change', applyFiltersAndSort);
-    anioMaxSelect?.addEventListener('change', applyFiltersAndSort);
+
+    // Eventos 'input' para los range sliders (actualizan mientras se arrastra)
+    anioMinInput?.addEventListener('input', applyFiltersAndSort);
+    anioMaxInput?.addEventListener('input', applyFiltersAndSort);
+
     roomCheckboxes.forEach((cb) => cb.addEventListener('change', applyFiltersAndSort));
     sortSelect?.addEventListener('change', applyFiltersAndSort);
 
@@ -398,7 +444,6 @@ const aniosUnicos = Array.from(
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // Ejecutar filtro inicial por si venía con ?q=
     if (initialQuery) {
       applyFiltersAndSort();
     }

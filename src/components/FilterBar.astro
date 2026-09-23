@@ -9,6 +9,12 @@ interface Props {
 }
 
 const { distritos, aniosEntrega, companies } = Astro.props;
+
+// Calcular año mínimo y máximo para el range slider
+const currentYear = new Date().getFullYear();
+const sortedAnios = [...new Set(aniosEntrega)].filter(Boolean).sort((a, b) => a - b);
+const minYear = sortedAnios.length > 0 ? sortedAnios[0] : currentYear;
+const maxYear = sortedAnios.length > 1 ? sortedAnios[sortedAnios.length - 1] : minYear + 4;
 ---
 
 <aside class="filter-sidebar">
@@ -39,9 +45,7 @@ const { distritos, aniosEntrega, companies } = Astro.props;
           </select>
         </div>
 
-
-
-        <!-- 3. Etapa -->
+        <!-- 2. Etapa -->
         <div class="filter-group">
           <label for="filter-etapa" class="filter-label">Etapa</label>
           <select id="filter-etapa" class="filter-select">
@@ -52,7 +56,7 @@ const { distritos, aniosEntrega, companies } = Astro.props;
           </select>
         </div>
 
-        <!-- 4. Rango de Precios -->
+        <!-- 3. Rango de Precios -->
         <div class="filter-group">
           <label class="filter-label">Precio (S/)</label>
           <div class="range-inputs">
@@ -62,27 +66,51 @@ const { distritos, aniosEntrega, companies } = Astro.props;
           </div>
         </div>
 
-        <!-- 5. Rango de Entrega -->
+        <!-- 4. Rango de Entrega (Range Slider con Tooltips Permanentes) -->
         <div class="filter-group">
           <label class="filter-label">Año de Entrega</label>
-          <div class="range-inputs">
-            <select id="filter-anio-min" class="filter-select">
-              <option value="">Desde</option>
-              {aniosEntrega.map((a) => (
-                <option value={a}>{a}</option>
-              ))}
-            </select>
-            <span class="range-separator">-</span>
-            <select id="filter-anio-max" class="filter-select">
-              <option value="">Hasta</option>
-              {aniosEntrega.map((a) => (
-                <option value={a}>{a}</option>
-              ))}
-            </select>
+
+          <div class="shadcn-slider-root" id="slider-root">
+            <div class="shadcn-slider-track">
+              <div class="shadcn-slider-range" id="anio-slider-range"></div>
+            </div>
+
+            <!-- Tooltips flotantes permanentes -->
+            <div id="tooltip-anio-min" class="shadcn-tooltip" aria-hidden="true">{minYear}</div>
+            <div id="tooltip-anio-max" class="shadcn-tooltip" aria-hidden="true">{maxYear}</div>
+
+            <!-- Inputs nativos del Range dual -->
+            <input
+              type="range"
+              id="filter-anio-min"
+              name="filter-anio-min"
+              min={minYear}
+              max={maxYear}
+              value={minYear}
+              step="1"
+              class="shadcn-slider-thumb-input"
+              aria-label="Año de entrega mínimo"
+            />
+            <input
+              type="range"
+              id="filter-anio-max"
+              name="filter-anio-max"
+              min={minYear}
+              max={maxYear}
+              value={maxYear}
+              step="1"
+              class="shadcn-slider-thumb-input"
+              aria-label="Año de entrega máximo"
+            />
+          </div>
+
+          <div class="range-ticks">
+            <span>{minYear}</span>
+            <span>{maxYear}</span>
           </div>
         </div>
 
-        <!-- Inmobiliaria -->
+        <!-- 5. Inmobiliaria -->
         <div class="filter-group">
           <label for="filter-empresa" class="filter-label">Inmobiliaria</label>
           <select id="filter-empresa" class="filter-select">
@@ -120,7 +148,6 @@ const { distritos, aniosEntrega, companies } = Astro.props;
     const filterContent = document.getElementById('filter-content');
     const toggleIcon = document.getElementById('toggle-icon');
 
-
     btnToggle?.addEventListener('click', () => {
       if (filterContent && toggleIcon) {
         const isCollapsed = filterContent.classList.toggle('is-collapsed');
@@ -129,34 +156,107 @@ const { distritos, aniosEntrega, companies } = Astro.props;
       }
     });
 
-    // Sincronización de clases activas para inputs y selects
+    // Control del Slider y Tooltips
+    const minInput = document.getElementById('filter-anio-min') as HTMLInputElement | null;
+    const maxInput = document.getElementById('filter-anio-max') as HTMLInputElement | null;
+    const rangeBar = document.getElementById('anio-slider-range');
+    const tooltipMin = document.getElementById('tooltip-anio-min');
+    const tooltipMax = document.getElementById('tooltip-anio-max');
+
+    function updateYearSlider(event?: Event) {
+      if (!minInput || !maxInput || !rangeBar) return;
+
+      let minVal = parseInt(minInput.value, 10);
+      let maxVal = parseInt(maxInput.value, 10);
+      const minLimit = parseInt(minInput.min, 10);
+      const maxLimit = parseInt(minInput.max, 10);
+      const totalSpan = maxLimit - minLimit || 1;
+
+      // Evitar cruces entre thumbs
+      if (minVal > maxVal) {
+        if (event?.target === minInput) {
+          minInput.value = String(maxVal);
+          minVal = maxVal;
+        } else {
+          maxInput.value = String(minVal);
+          maxVal = minVal;
+        }
+      }
+
+      // Porcentajes para posicionamiento
+      const percentMin = ((minVal - minLimit) / totalSpan) * 100;
+      const percentMax = ((maxVal - minLimit) / totalSpan) * 100;
+
+      // Actualizar barra de rango seleccionada
+      rangeBar.style.left = `${percentMin}%`;
+      rangeBar.style.width = `${percentMax - percentMin}%`;
+
+      // Posicionamiento de tooltips compensando el centro del thumb (18px)
+      if (tooltipMin) {
+        tooltipMin.textContent = String(minVal);
+        tooltipMin.style.left = `calc(${percentMin}% + ${9 - percentMin * 0.18}px)`;
+      }
+      if (tooltipMax) {
+        tooltipMax.textContent = String(maxVal);
+        tooltipMax.style.left = `calc(${percentMax}% + ${9 - percentMax * 0.18}px)`;
+      }
+
+      // Priorizar z-index del thumb y tooltip cuando se acercan al extremo superior
+      if (minVal > maxLimit - (totalSpan * 0.1)) {
+        minInput.style.zIndex = '5';
+        if (tooltipMin) tooltipMin.style.zIndex = '12';
+        if (tooltipMax) tooltipMax.style.zIndex = '11';
+      } else {
+        minInput.style.zIndex = '3';
+        if (tooltipMin) tooltipMin.style.zIndex = '11';
+        if (tooltipMax) tooltipMax.style.zIndex = '12';
+      }
+    }
+
+    minInput?.addEventListener('input', (e) => {
+      updateYearSlider(e);
+      syncActiveClasses();
+    });
+
+    maxInput?.addEventListener('input', (e) => {
+      updateYearSlider(e);
+      syncActiveClasses();
+    });
+
+    function resetYearSlider() {
+      if (minInput && maxInput) {
+        minInput.value = minInput.min;
+        maxInput.value = maxInput.max;
+        updateYearSlider();
+      }
+    }
+
+    // Sincronización de clases activas
     const selects = document.querySelectorAll<HTMLSelectElement>('.filter-select');
     const inputs = document.querySelectorAll<HTMLInputElement>('.filter-input');
 
     function syncActiveClasses() {
-      selects.forEach((sel) => {
-        sel.classList.toggle('is-active', sel.value !== '');
-      });
-      inputs.forEach((inp) => {
-        inp.classList.toggle('is-active', inp.value.trim() !== '');
-      });
+      selects.forEach((sel) => sel.classList.toggle('is-active', sel.value !== ''));
+      inputs.forEach((inp) => inp.classList.toggle('is-active', inp.value.trim() !== ''));
     }
 
     selects.forEach((sel) => sel.addEventListener('change', syncActiveClasses));
     inputs.forEach((inp) => inp.addEventListener('input', syncActiveClasses));
 
-    // Monitorear reseteos desde botones o chips
+    // Monitorear reseteos únicamente en los botones de reseteo (evitando los chips)
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement | null;
       if (
         target?.closest('#btn-reset-filters') || 
-        target?.closest('#btn-no-results-reset') || 
-        target?.closest('.filter-chip')
+        target?.closest('#btn-no-results-reset')
       ) {
+        resetYearSlider();
         setTimeout(syncActiveClasses, 10);
       }
     });
 
+    // Iniciar posiciones iniciales
+    updateYearSlider();
     syncActiveClasses();
   });
 </script>
@@ -257,7 +357,7 @@ const { distritos, aniosEntrega, companies } = Astro.props;
   .filter-group {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.55rem;
   }
 
   .filter-label {
@@ -278,7 +378,159 @@ const { distritos, aniosEntrega, companies } = Astro.props;
     font-weight: 700;
   }
 
-  /* ESTILO BASE DE SELECTS E INPUTS */
+  /* ========================================= */
+  /* RANGE SLIDER & TOOLTIPS (SHADCN/UI STYLE) */
+  /* ========================================= */
+  .shadcn-slider-root {
+    position: relative;
+    width: 100%;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    user-select: none;
+    touch-action: none;
+    margin-top: 1.5rem; /* Margen superior para los tooltips siempre visibles */
+  }
+
+  /* Tooltip Flotante Permanente */
+  .shadcn-tooltip {
+    position: absolute;
+    bottom: calc(100% + 5px);
+    transform: translateX(-50%);
+    background-color: #0f172a; /* Slate 900 de shadcn */
+    color: #f8fafc;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0.25rem 0.45rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 1;
+    visibility: visible;
+    z-index: 10;
+  }
+
+  /* Flecha indicadora en la base del tooltip */
+  .shadcn-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 4px 4px 0 4px;
+    border-style: solid;
+    border-color: #0f172a transparent transparent transparent;
+  }
+
+  /* Track / Riel base */
+  .shadcn-slider-track {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    background-color: #e2e8f0;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+
+  /* Barra de rango seleccionada */
+  .shadcn-slider-range {
+    position: absolute;
+    height: 100%;
+    background-color: var(--color-remax-blue);
+    border-radius: 9999px;
+  }
+
+  /* Inputs nativos del Range */
+  .shadcn-slider-thumb-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+    z-index: 3;
+    outline: none;
+  }
+
+  /* Thumbs (Chrome, Safari, Edge) */
+  .shadcn-slider-thumb-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    background-color: #ffffff;
+    border: 2px solid var(--color-remax-blue);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1);
+    cursor: grab;
+    pointer-events: auto;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .shadcn-slider-thumb-input::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+  }
+
+  .shadcn-slider-thumb-input:active::-webkit-slider-thumb {
+    cursor: grabbing;
+    transform: scale(1.15);
+  }
+
+  .shadcn-slider-thumb-input:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 3px rgba(0, 61, 165, 0.25);
+  }
+
+  /* Thumbs (Firefox) */
+  .shadcn-slider-thumb-input::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    background-color: #ffffff;
+    border: 2px solid var(--color-remax-blue);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1);
+    cursor: grab;
+    pointer-events: auto;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .shadcn-slider-thumb-input::-moz-range-thumb:hover {
+    transform: scale(1.15);
+  }
+
+  .shadcn-slider-thumb-input:active::-moz-range-thumb {
+    cursor: grabbing;
+    transform: scale(1.15);
+  }
+
+  .shadcn-slider-thumb-input:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 3px rgba(0, 61, 165, 0.25);
+  }
+
+  .shadcn-slider-thumb-input::-webkit-slider-runnable-track {
+    background: transparent;
+    border: none;
+  }
+  .shadcn-slider-thumb-input::-moz-range-track {
+    background: transparent;
+    border: none;
+  }
+
+  .range-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    padding: 0 2px;
+  }
+
+  /* ESTILOS DE SELECTS E INPUTS BASE */
   .filter-select, .filter-input {
     width: 100%;
     padding: 0.45rem 0.6rem;
@@ -300,10 +552,9 @@ const { distritos, aniosEntrega, companies } = Astro.props;
     background-size: 0.9rem;
     padding-right: 2rem;
     cursor: pointer;
-    color: var(--color-text-muted); /* Color gris por defecto tipo placeholder */
+    color: var(--color-text-muted);
   }
 
-  /* Asegura que las opciones del desplegable mantengan su color normal */
   .filter-select option {
     color: var(--color-text-main);
     font-weight: 500;
@@ -313,7 +564,6 @@ const { distritos, aniosEntrega, companies } = Astro.props;
     color: var(--color-text-muted);
   }
 
-  /* Color gris en placeholders de inputs de texto/número */
   .filter-input {
     color: var(--color-text-main);
   }
@@ -323,7 +573,6 @@ const { distritos, aniosEntrega, companies } = Astro.props;
     opacity: 0.8;
   }
 
-  /* ESTADOS ACTIVOS: Borde resaltado y fondo sutil */
   .filter-select.is-active,
   .filter-select:not(:has(option[value=""]:checked)),
   .filter-input.is-active,
@@ -335,7 +584,6 @@ const { distritos, aniosEntrega, companies } = Astro.props;
     font-weight: 600;
   }
 
-  /* ESTADO FOCUS */
   .filter-select:focus, 
   .filter-input:focus {
     border-color: var(--color-remax-blue);
