@@ -1,5 +1,6 @@
 ---
-import { Search, MonitorPlay } from 'lucide-astro';
+import { Search, CircleHelp } from 'lucide-astro';
+import { GENERAL_TUTORIAL } from '../config/tutorials';
 ---
 
 <header class="site-header">
@@ -25,22 +26,23 @@ import { Search, MonitorPlay } from 'lucide-astro';
             name="q" 
             id="header-search-input" 
             class="header-search-input"
-            placeholder="Buscar por proyecto..." 
+            placeholder="Buscar proyecto..." 
             autocomplete="off"
           />
         </div>
       </form>
 
-      <!-- BOTÓN TUTORIALES CON ICONO CIRCLE HELP -->
+      <!-- BOTÓN DIRECTO AL TUTORIAL GENERAL -->
       <button 
         type="button" 
-        id="btn-open-tutorial" 
-        class="header-tutorial-btn" 
-        title="Ver tutoriales"
-        aria-label="Ver tutoriales"
+        class="header-tutorial-btn js-tutorial-trigger" 
+        data-video-id={GENERAL_TUTORIAL.youtubeId}
+        data-video-title={GENERAL_TUTORIAL.titulo}
+        title={GENERAL_TUTORIAL.titulo}
+        aria-label={GENERAL_TUTORIAL.titulo}
       >
-        <MonitorPlay size={16} class="btn-help-icon" />
-        <span class="btn-text">Tutoriales</span>
+        <CircleHelp size={16} class="btn-help-icon" />
+        <span class="btn-text">¿Cómo busco un proyecto?</span>
       </button>
     </div>
   </div>
@@ -51,8 +53,8 @@ import { Search, MonitorPlay } from 'lucide-astro';
     position: sticky;
     top: 0;
     z-index: 50;
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(1px);
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(2px);
     border-bottom: 2px solid var(--color-remax-blue);
     box-shadow: 0 0 20px var(--color-text-main);
   }
@@ -92,7 +94,6 @@ import { Search, MonitorPlay } from 'lucide-astro';
     white-space: nowrap;
   }
 
-  /* CONTENEDOR DE ACCIONES DERECHA */
   .header-actions {
     display: flex;
     align-items: center;
@@ -100,11 +101,10 @@ import { Search, MonitorPlay } from 'lucide-astro';
     flex-shrink: 0;
   }
 
-  /* BARRA DE BÚSQUEDA */
   .header-search-form {
     display: flex;
     align-items: center;
-    max-width: 280px;
+    max-width: 260px;
     width: 100%;
   }
 
@@ -141,7 +141,6 @@ import { Search, MonitorPlay } from 'lucide-astro';
     box-shadow: 0 0 0 3px rgba(0, 61, 165, 0.12);
   }
 
-  /* BOTÓN TUTORIALES */
   .header-tutorial-btn {
     height: 36px;
     padding: 0 0.85rem;
@@ -174,13 +173,13 @@ import { Search, MonitorPlay } from 'lucide-astro';
     flex-shrink: 0;
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     .brand-title, .brand-divider {
       display: none;
     }
 
     .header-search-form {
-      max-width: 180px;
+      max-width: 170px;
     }
 
     .header-tutorial-btn {
