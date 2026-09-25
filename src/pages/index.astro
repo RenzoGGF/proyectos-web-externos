@@ -50,7 +50,6 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
       <FilterBar 
         distritos={distritosUnicos} 
         aniosEntrega={aniosUnicos} 
-        companies={companiesSorted}
         minPrecio={minPrecioDetectado}
         maxPrecio={maxPrecioDetectado}
       />
@@ -115,7 +114,6 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
     const searchForm = document.querySelector('.header-search-form') as HTMLFormElement | null;
 
     const distritoSelect = document.getElementById('filter-distrito') as HTMLSelectElement | null;
-    const empresaSelect = document.getElementById('filter-empresa') as HTMLSelectElement | null;
     const etapaSelect = document.getElementById('filter-etapa') as HTMLSelectElement | null;
     
     // Sliders
@@ -168,14 +166,6 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
         chips.push({
           label: `${text}`,
           clear: () => { distritoSelect.value = ''; applyFiltersAndSort(); }
-        });
-      }
-
-      if (empresaSelect?.value) {
-        const text = empresaSelect.options[empresaSelect.selectedIndex].text;
-        chips.push({
-          label: `${text}`,
-          clear: () => { empresaSelect.value = ''; applyFiltersAndSort(); }
         });
       }
 
@@ -309,7 +299,6 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
     function applyFiltersAndSort() {
       const searchVal = (searchInput?.value || '').trim().toLowerCase();
       const distritoVal = distritoSelect?.value.toLowerCase() || '';
-      const empresaVal = empresaSelect?.value.toLowerCase() || '';
       const etapaVal = etapaSelect?.value || '';
 
       // Filtro de precio activo solo si difiere de los límites extremos
@@ -371,7 +360,6 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
 
         const matchesNombre = !searchVal || cardNombre.includes(searchVal);
         const matchesDistrito = !distritoVal || cardDistrito === distritoVal;
-        const matchesEmpresa = !empresaVal || cardEmpresa === empresaVal;
         const matchesEtapa = !etapaVal || cardEtapa === etapaVal;
 
         const matchesPrecioMin = !precioMinVal || (cardPrecio > 0 && cardPrecio >= precioMinVal);
@@ -399,7 +387,7 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
           });
         }
 
-        const isVisible = matchesNombre && matchesDistrito && matchesEmpresa && matchesEtapa && matchesPrecio && matchesAnio && matchesHabitaciones;
+        const isVisible = matchesNombre && matchesDistrito && matchesEtapa && matchesPrecio && matchesAnio && matchesHabitaciones;
 
         if (isVisible) {
           card.classList.remove('hidden');
@@ -430,7 +418,6 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
     function resetAllFilters() {
       if (searchInput) searchInput.value = '';
       if (distritoSelect) distritoSelect.value = '';
-      if (empresaSelect) empresaSelect.value = '';
       if (etapaSelect) etapaSelect.value = '';
       
       // Asignar al límite respectivo, nunca cadena vacía ''
@@ -464,7 +451,6 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
 
     searchInput?.addEventListener('input', applyFiltersAndSort);
     distritoSelect?.addEventListener('change', applyFiltersAndSort);
-    empresaSelect?.addEventListener('change', applyFiltersAndSort);
     etapaSelect?.addEventListener('change', applyFiltersAndSort);
 
     precioMinInput?.addEventListener('input', applyFiltersAndSort);

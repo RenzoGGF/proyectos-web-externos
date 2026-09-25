@@ -5,7 +5,6 @@ import type { Company } from '../types/index';
 interface Props {
   distritos: string[];
   aniosEntrega: number[];
-  companies: Company[];
   minPrecio?: number;
   maxPrecio?: number;
 }
@@ -13,7 +12,6 @@ interface Props {
 const { 
   distritos, 
   aniosEntrega, 
-  companies, 
   minPrecio = 100000, 
   maxPrecio = 1500000 
 } = Astro.props;
@@ -107,11 +105,6 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
               aria-label="Precio máximo en soles"
             />
           </div>
-
-          <div class="range-ticks">
-            <span>{formatSoles(minPriceRounded)}</span>
-            <span>{formatSoles(maxPriceRounded)}</span>
-          </div>
         </div>
 
         <!-- 4. Rango de Entrega -->
@@ -149,22 +142,6 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
               aria-label="Año de entrega máximo"
             />
           </div>
-
-          <div class="range-ticks">
-            <span>{minYear}</span>
-            <span>{maxYear}</span>
-          </div>
-        </div>
-
-        <!-- 5. Inmobiliaria -->
-        <div class="filter-group">
-          <label for="filter-empresa" class="filter-label">Inmobiliaria</label>
-          <select id="filter-empresa" class="filter-select">
-            <option value="">Todas las Inmobiliarias</option>
-            {companies.map((c) => (
-              <option value={c.id.toLowerCase()}>{c.nombre}</option>
-            ))}
-          </select>
         </div>
 
         <!-- 6. Habitaciones / Espacio -->
@@ -516,12 +493,12 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
     align-items: center;
     user-select: none;
     touch-action: none;
-    margin-top: 1.6rem;
+    margin-bottom: 1.6rem; /* Se traslada el margen hacia abajo para dar espacio al tooltip */
   }
 
   .shadcn-tooltip {
     position: absolute;
-    bottom: calc(100% + 5px);
+    top: calc(100% + 5px); /* Ahora se posiciona debajo del track */
     transform: translateX(-50%);
     background-color: #0f172a;
     color: #f8fafc;
@@ -541,12 +518,12 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
   .shadcn-tooltip::after {
     content: '';
     position: absolute;
-    top: 100%;
+    bottom: 100%; /* La flecha apunta hacia arriba, conectando con el slider */
     left: 50%;
     transform: translateX(-50%);
-    border-width: 4px 4px 0 4px;
+    border-width: 0 4px 4px 4px;
     border-style: solid;
-    border-color: #0f172a transparent transparent transparent;
+    border-color: transparent transparent #0f172a transparent;
   }
 
   .shadcn-slider-track {
@@ -640,15 +617,6 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
   .shadcn-slider-thumb-input::-moz-range-track {
     background: transparent;
     border: none;
-  }
-
-  .range-ticks {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.72rem;
-    color: var(--color-text-muted);
-    font-weight: 600;
-    padding: 0 2px;
   }
 
   .filter-select {
