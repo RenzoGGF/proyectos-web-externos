@@ -344,7 +344,7 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
       rangeBarId: 'precio-slider-range',
       tooltipMinId: 'tooltip-precio-min',
       tooltipMaxId: 'tooltip-precio-max',
-      formatFn: (val) => `S/ ${val.toLocaleString('es-PE')}`,
+      formatFn: (val) => `${val.toLocaleString('es-PE')}`,
     });
 
     const yearSlider = setupDualSlider({
