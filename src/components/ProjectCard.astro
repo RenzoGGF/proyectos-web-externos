@@ -64,7 +64,7 @@ const dataEntregaOrden = project.etapa === 'entrega_inmediata'
       onerror="this.onerror=null; this.src='/images/projects/default.webp';"
     />
 
-    <div class="company-logo-badge">
+    <div class="company-logo-badge" title={company?.nombre || 'Constructora'}>
       <img 
         src={company?.logo || `/images/companies/${project.empresaId.toLowerCase()}.webp`} 
         alt={company?.nombre || 'Constructora'}
@@ -87,8 +87,8 @@ const dataEntregaOrden = project.etapa === 'entrega_inmediata'
     <h2 class="project-name">{project.nombre}</h2>
 
     <p class="project-district">
-      <span>{project.distrito}</span>
       <MapPin size={15} class="inline-icon" />
+      <span>{project.distrito}</span>
     </p>
 
     {project.direccion && (
@@ -140,6 +140,7 @@ const dataEntregaOrden = project.etapa === 'entrega_inmediata'
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   }
 
+  /* Sombra hover original restaurada */
   .project-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 0 20px var(--color-text-main);
@@ -154,6 +155,8 @@ const dataEntregaOrden = project.etapa === 'entrega_inmediata'
   }
 
   .project-image {
+    position: relative;
+    z-index: 1;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -165,9 +168,32 @@ const dataEntregaOrden = project.etapa === 'entrega_inmediata'
     transform: scale(1.05);
   }
 
-  .company-logo-badge,
+  /* Badge de constructora en la imagen: z-index 10 garantizado sobre la foto */
+  .company-logo-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 32px;
+    height: 32px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    padding: 3px;
+    z-index: 10;
+  }
+
+  .company-logo-badge img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
   .desktop-image-overlay {
     display: none;
+    z-index: 5;
   }
 
   .card-info {
@@ -265,7 +291,7 @@ const dataEntregaOrden = project.etapa === 'entrega_inmediata'
     color: #0f172a;
   }
 
-  @media (min-width: 1024px) {
+  @media (min-width: 640px) {
     .project-card {
       flex-direction: column;
     }
@@ -279,25 +305,14 @@ const dataEntregaOrden = project.etapa === 'entrega_inmediata'
     }
 
     .company-logo-badge {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
       top: 10px;
       left: 10px;
-      width: 52px;
-      height: 52px;
-      background-color: #ffffff;
+      width: 48px;
+      height: 48px;
+      padding: 4px;
       border-radius: var(--radius-md);
       box-shadow: var(--shadow-sm);
-      padding: 4px;
-      z-index: 2;
-    }
-
-    .company-logo-badge img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
+      z-index: 10;
     }
 
     .desktop-image-overlay {
@@ -313,6 +328,7 @@ const dataEntregaOrden = project.etapa === 'entrega_inmediata'
       text-transform: uppercase;
       font-weight: 700;
       text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      z-index: 5;
     }
 
     .mobile-etapa-tag {
@@ -320,16 +336,16 @@ const dataEntregaOrden = project.etapa === 'entrega_inmediata'
     }
 
     .card-info {
-      padding: 1.25rem;
+      padding: 1.15rem;
     }
 
     .project-name {
-      font-size: 1.22rem;
-      margin-bottom: 0.5rem;
+      font-size: 1.18rem;
+      margin-bottom: 0.45rem;
     }
 
     .price-value {
-      font-size: 1.37rem;
+      font-size: 1.3rem;
     }
   }
 </style>

@@ -1,5 +1,5 @@
 ---
-import { SearchX, ArrowUp, MapPinned } from 'lucide-astro';
+import { SearchX, ArrowUp } from 'lucide-astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import ProjectCard from '../components/ProjectCard.astro';
@@ -65,11 +65,6 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
           </div>
         
           <div class="results-controls">
-            <a href="/mapa" class="btn-toggle-map">
-              <MapPinned size={15} />
-              <span>Ver en Mapa</span>
-            </a>
-          
             <div class="sort-control">
               <label for="sort-select" class="sort-label">Ordenar por:</label>
               <select id="sort-select" class="sort-select">
@@ -669,29 +664,9 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
   }
 
   .results-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.btn-toggle-map {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem 0.75rem;
-  background-color: #ffffff;
-  color: var(--color-remax-blue);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.btn-toggle-map:hover {
-  background-color: #eff6ff;
-  border-color: var(--color-remax-blue);
-}
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
 </style>

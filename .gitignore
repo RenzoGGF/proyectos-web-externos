@@ -14,3 +14,7 @@ data/*.xlsx
 .DS_Store
 .vscode/
 .idea/
+
+# Nada de .md
+*.md
+!README.md
