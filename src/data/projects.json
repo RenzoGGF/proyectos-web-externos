@@ -135,7 +135,7 @@
     "empresaId": "c-grupo-tyc",
     "nombre": "MINIMAL",
     "distrito": "Cercado De Lima",
-    "direccion": "Av. Arequipa 1444, Santa Beatriz",
+    "direccion": "Arequipa 1444",
     "enlace": "https://drive.google.com/drive/folders/1Hhxe0KKWOR2tIuS5ih-UAWA68VinFZ4m",
     "etapa": "en_construccion",
     "fechaEntrega": {
@@ -165,7 +165,10 @@
     "precioMin": 198353,
     "estado": "activo",
     "imagen": "/images/projects/p-minimal.webp",
-    "ubicacion": null
+    "ubicacion": {
+      "lat": -12.0568912,
+      "lng": -77.0330527
+    }
   },
   {
     "id": "p-catalina-sky",
@@ -303,7 +306,7 @@
     "empresaId": "c-edifica-inversiones-del-sur-sac",
     "nombre": "SKYLINE",
     "distrito": "Magdalena",
-    "direccion": "Calle Comandante Jiménez 329",
+    "direccion": "Comandante Jiménez 329",
     "enlace": "https://www.dropbox.com/scl/fo/zh8zyeea685724doeqfdb/ALiq6Nrw7WNc7509VCvInsk/i.%20Proyecto%20en%20Magdalena/Skyline%20(Nuevo%20Lanzamiento)?dl=0&rlkey=os4bsfj1if9iumcavw2m0lt48&subfolder_nav_tracking=1",
     "etapa": "en_planos",
     "fechaEntrega": {
@@ -334,7 +337,10 @@
     "precioMin": 387501,
     "estado": "activo",
     "imagen": "/images/projects/p-skyline.webp",
-    "ubicacion": null
+    "ubicacion": {
+      "lat": -12.0927233,
+      "lng": -77.0599835
+    }
   },
   {
     "id": "p-acacias-353",
@@ -1479,7 +1485,7 @@
     "empresaId": "c-ter",
     "nombre": "PACIFICO 299",
     "distrito": "Surco",
-    "direccion": "Calle Mar Caribe 188",
+    "direccion": "Mar Caribe 188",
     "enlace": "https://drive.google.com/drive/folders/1FgUJ9LraN9LryKPEpXpyjQhneaRtShml",
     "etapa": "en_construccion",
     "fechaEntrega": {
@@ -1512,7 +1518,10 @@
     "precioMin": 755720,
     "estado": "activo",
     "imagen": "/images/projects/p-pacifico-299.webp",
-    "ubicacion": null
+    "ubicacion": {
+      "lat": -12.0810794,
+      "lng": -76.9758659
+    }
   },
   {
     "id": "p-element",
