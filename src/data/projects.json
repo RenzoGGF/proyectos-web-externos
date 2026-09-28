@@ -35,7 +35,11 @@
     ],
     "precioMin": 371333,
     "estado": "activo",
-    "imagen": "/images/projects/p-aspiria.webp"
+    "imagen": "/images/projects/p-aspiria.webp",
+    "ubicacion": {
+      "lat": -12.1393002,
+      "lng": -77.0199436
+    }
   },
   {
     "id": "p-grau-10",
@@ -74,7 +78,11 @@
     ],
     "precioMin": 405069,
     "estado": "activo",
-    "imagen": "/images/projects/p-grau-10.webp"
+    "imagen": "/images/projects/p-grau-10.webp",
+    "ubicacion": {
+      "lat": -12.1390967,
+      "lng": -77.0222866
+    }
   },
   {
     "id": "p-the-muse",
@@ -114,7 +122,11 @@
     ],
     "precioMin": 395296,
     "estado": "activo",
-    "imagen": "/images/projects/p-the-muse.webp"
+    "imagen": "/images/projects/p-the-muse.webp",
+    "ubicacion": {
+      "lat": -12.1402956,
+      "lng": -77.0234183
+    }
   },
   {
     "id": "p-minimal",
@@ -152,7 +164,8 @@
     ],
     "precioMin": 198353,
     "estado": "activo",
-    "imagen": "/images/projects/p-minimal.webp"
+    "imagen": "/images/projects/p-minimal.webp",
+    "ubicacion": null
   },
   {
     "id": "p-catalina-sky",
@@ -191,7 +204,11 @@
     ],
     "precioMin": 224323,
     "estado": "activo",
-    "imagen": "/images/projects/p-catalina-sky.webp"
+    "imagen": "/images/projects/p-catalina-sky.webp",
+    "ubicacion": {
+      "lat": -12.0843993,
+      "lng": -77.0146807
+    }
   },
   {
     "id": "p-bloom",
@@ -231,7 +248,11 @@
     ],
     "precioMin": 372117,
     "estado": "activo",
-    "imagen": "/images/projects/p-bloom.webp"
+    "imagen": "/images/projects/p-bloom.webp",
+    "ubicacion": {
+      "lat": -12.0895253,
+      "lng": -77.0418839
+    }
   },
   {
     "id": "p-mural",
@@ -269,7 +290,11 @@
     ],
     "precioMin": 205330,
     "estado": "activo",
-    "imagen": "/images/projects/p-mural.webp"
+    "imagen": "/images/projects/p-mural.webp",
+    "ubicacion": {
+      "lat": -12.082422,
+      "lng": -77.0346907
+    }
   },
   {
     "id": "p-skyline",
@@ -308,7 +333,8 @@
     ],
     "precioMin": 387501,
     "estado": "activo",
-    "imagen": "/images/projects/p-skyline.webp"
+    "imagen": "/images/projects/p-skyline.webp",
+    "ubicacion": null
   },
   {
     "id": "p-acacias-353",
@@ -347,7 +373,11 @@
     ],
     "precioMin": 621133,
     "estado": "activo",
-    "imagen": "/images/projects/p-acacias-353.webp"
+    "imagen": "/images/projects/p-acacias-353.webp",
+    "ubicacion": {
+      "lat": -12.1333411,
+      "lng": -77.025002
+    }
   },
   {
     "id": "p-affinity",
@@ -387,7 +417,11 @@
     ],
     "precioMin": 435837,
     "estado": "activo",
-    "imagen": "/images/projects/p-affinity.webp"
+    "imagen": "/images/projects/p-affinity.webp",
+    "ubicacion": {
+      "lat": -12.1264026,
+      "lng": -77.0235292
+    }
   },
   {
     "id": "p-legacy",
@@ -425,7 +459,11 @@
     ],
     "precioMin": 626543,
     "estado": "activo",
-    "imagen": "/images/projects/p-legacy.webp"
+    "imagen": "/images/projects/p-legacy.webp",
+    "ubicacion": {
+      "lat": -12.129084,
+      "lng": -77.0080236
+    }
   },
   {
     "id": "p-monument",
@@ -464,7 +502,11 @@
     ],
     "precioMin": 816850,
     "estado": "activo",
-    "imagen": "/images/projects/p-monument.webp"
+    "imagen": "/images/projects/p-monument.webp",
+    "ubicacion": {
+      "lat": -12.1291018,
+      "lng": -77.0239398
+    }
   },
   {
     "id": "p-chamberi-123",
@@ -493,7 +535,11 @@
     "banos": [],
     "precioMin": 1225700,
     "estado": "activo",
-    "imagen": "/images/projects/p-chamberi-123.webp"
+    "imagen": "/images/projects/p-chamberi-123.webp",
+    "ubicacion": {
+      "lat": -12.1130704,
+      "lng": -77.0401169
+    }
   },
   {
     "id": "p-meiggs-210",
@@ -527,7 +573,11 @@
     "banos": [],
     "precioMin": 1251200,
     "estado": "activo",
-    "imagen": "/images/projects/p-meiggs-210.webp"
+    "imagen": "/images/projects/p-meiggs-210.webp",
+    "ubicacion": {
+      "lat": -12.1115809,
+      "lng": -77.0357807
+    }
   },
   {
     "id": "p-manuel-segura-260",
@@ -562,7 +612,11 @@
     "banos": [],
     "precioMin": 797300,
     "estado": "activo",
-    "imagen": "/images/projects/p-manuel-segura-260.webp"
+    "imagen": "/images/projects/p-manuel-segura-260.webp",
+    "ubicacion": {
+      "lat": -12.1203087,
+      "lng": -77.0423445
+    }
   },
   {
     "id": "p-colon-470",
@@ -589,12 +643,17 @@
     "areaMax": 190.74,
     "habitaciones": [
       1,
-      2
+      2,
+      3
     ],
     "banos": [],
     "precioMin": 707200,
     "estado": "activo",
-    "imagen": "/images/projects/p-colon-470.webp"
+    "imagen": "/images/projects/p-colon-470.webp",
+    "ubicacion": {
+      "lat": -12.1278846,
+      "lng": -77.0312283
+    }
   },
   {
     "id": "p-bolognesi-472",
@@ -625,7 +684,11 @@
     "banos": [],
     "precioMin": 839800,
     "estado": "activo",
-    "imagen": "/images/projects/p-bolognesi-472.webp"
+    "imagen": "/images/projects/p-bolognesi-472.webp",
+    "ubicacion": {
+      "lat": -12.122861,
+      "lng": -77.0360851
+    }
   },
   {
     "id": "p-mandra",
@@ -660,7 +723,11 @@
     ],
     "precioMin": 534792,
     "estado": "activo",
-    "imagen": "/images/projects/p-mandra.webp"
+    "imagen": "/images/projects/p-mandra.webp",
+    "ubicacion": {
+      "lat": -12.1170968,
+      "lng": -77.0445896
+    }
   },
   {
     "id": "p-fanning-277",
@@ -695,7 +762,11 @@
     "banos": [],
     "precioMin": 737800,
     "estado": "activo",
-    "imagen": "/images/projects/p-fanning-277.webp"
+    "imagen": "/images/projects/p-fanning-277.webp",
+    "ubicacion": {
+      "lat": -12.1288304,
+      "lng": -77.032184
+    }
   },
   {
     "id": "p-pardo-coast",
@@ -732,7 +803,11 @@
     ],
     "precioMin": 504585,
     "estado": "activo",
-    "imagen": "/images/projects/p-pardo-coast.webp"
+    "imagen": "/images/projects/p-pardo-coast.webp",
+    "ubicacion": {
+      "lat": -12.1190043,
+      "lng": -77.0330387
+    }
   },
   {
     "id": "p-urban-heights",
@@ -768,7 +843,11 @@
     ],
     "precioMin": 483437,
     "estado": "activo",
-    "imagen": "/images/projects/p-urban-heights.webp"
+    "imagen": "/images/projects/p-urban-heights.webp",
+    "ubicacion": {
+      "lat": -12.1264026,
+      "lng": -77.0235292
+    }
   },
   {
     "id": "p-bolivar-1209",
@@ -806,7 +885,11 @@
     ],
     "precioMin": 333829.69,
     "estado": "activo",
-    "imagen": "/images/projects/p-bolivar-1209.webp"
+    "imagen": "/images/projects/p-bolivar-1209.webp",
+    "ubicacion": {
+      "lat": -12.0724502,
+      "lng": -77.0665033
+    }
   },
   {
     "id": "p-prado-harmony",
@@ -844,7 +927,11 @@
     ],
     "precioMin": 236782,
     "estado": "activo",
-    "imagen": "/images/projects/p-prado-harmony.webp"
+    "imagen": "/images/projects/p-prado-harmony.webp",
+    "ubicacion": {
+      "lat": -12.0941314,
+      "lng": -77.0568126
+    }
   },
   {
     "id": "p-the-summit",
@@ -882,7 +969,11 @@
     ],
     "precioMin": 388389,
     "estado": "activo",
-    "imagen": "/images/projects/p-the-summit.webp"
+    "imagen": "/images/projects/p-the-summit.webp",
+    "ubicacion": {
+      "lat": -12.1075914,
+      "lng": -77.0539457
+    }
   },
   {
     "id": "p-tree",
@@ -922,7 +1013,11 @@
     ],
     "precioMin": 303313,
     "estado": "activo",
-    "imagen": "/images/projects/p-tree.webp"
+    "imagen": "/images/projects/p-tree.webp",
+    "ubicacion": {
+      "lat": -12.0913946,
+      "lng": -77.0293978
+    }
   },
   {
     "id": "p-aramburu-living",
@@ -958,7 +1053,11 @@
     ],
     "precioMin": 352856,
     "estado": "activo",
-    "imagen": "/images/projects/p-aramburu-living.webp"
+    "imagen": "/images/projects/p-aramburu-living.webp",
+    "ubicacion": {
+      "lat": -12.1033621,
+      "lng": -77.0309993
+    }
   },
   {
     "id": "p-ascent",
@@ -997,7 +1096,11 @@
     ],
     "precioMin": 706472,
     "estado": "activo",
-    "imagen": "/images/projects/p-ascent.webp"
+    "imagen": "/images/projects/p-ascent.webp",
+    "ubicacion": {
+      "lat": -12.0919109,
+      "lng": -77.0267979
+    }
   },
   {
     "id": "p-parque-acosta-161",
@@ -1031,7 +1134,11 @@
     "banos": [],
     "precioMin": 926500,
     "estado": "activo",
-    "imagen": "/images/projects/p-parque-acosta-161.webp"
+    "imagen": "/images/projects/p-parque-acosta-161.webp",
+    "ubicacion": {
+      "lat": -12.0976648,
+      "lng": -77.0581725
+    }
   },
   {
     "id": "p-palm-living",
@@ -1069,7 +1176,11 @@
     ],
     "precioMin": 371997,
     "estado": "activo",
-    "imagen": "/images/projects/p-palm-living.webp"
+    "imagen": "/images/projects/p-palm-living.webp",
+    "ubicacion": {
+      "lat": -12.0921567,
+      "lng": -77.0387526
+    }
   },
   {
     "id": "p-vertyce",
@@ -1109,7 +1220,11 @@
     ],
     "precioMin": 316730,
     "estado": "activo",
-    "imagen": "/images/projects/p-vertyce.webp"
+    "imagen": "/images/projects/p-vertyce.webp",
+    "ubicacion": {
+      "lat": -12.0911481,
+      "lng": -77.0141638
+    }
   },
   {
     "id": "p-costanova",
@@ -1148,7 +1263,11 @@
     ],
     "precioMin": 156414,
     "estado": "activo",
-    "imagen": "/images/projects/p-costanova.webp"
+    "imagen": "/images/projects/p-costanova.webp",
+    "ubicacion": {
+      "lat": -12.0883518,
+      "lng": -77.0904879
+    }
   },
   {
     "id": "p-bertolotto",
@@ -1182,7 +1301,11 @@
     ],
     "precioMin": 470250,
     "estado": "activo",
-    "imagen": "/images/projects/p-bertolotto.webp"
+    "imagen": "/images/projects/p-bertolotto.webp",
+    "ubicacion": {
+      "lat": -12.092562,
+      "lng": -77.0810759
+    }
   },
   {
     "id": "p-hub-encalada",
@@ -1222,7 +1345,11 @@
     ],
     "precioMin": 394328,
     "estado": "activo",
-    "imagen": "/images/projects/p-hub-encalada.webp"
+    "imagen": "/images/projects/p-hub-encalada.webp",
+    "ubicacion": {
+      "lat": -12.1087781,
+      "lng": -76.972578
+    }
   },
   {
     "id": "p-iq-encalada",
@@ -1256,7 +1383,11 @@
     ],
     "precioMin": 224919,
     "estado": "activo",
-    "imagen": "/images/projects/p-iq-encalada.webp"
+    "imagen": "/images/projects/p-iq-encalada.webp",
+    "ubicacion": {
+      "lat": -12.1029649,
+      "lng": -76.9703232
+    }
   },
   {
     "id": "p-look-and-feel-2",
@@ -1294,7 +1425,11 @@
     ],
     "precioMin": 449308,
     "estado": "activo",
-    "imagen": "/images/projects/p-look-and-feel-2.webp"
+    "imagen": "/images/projects/p-look-and-feel-2.webp",
+    "ubicacion": {
+      "lat": -12.1087781,
+      "lng": -76.972578
+    }
   },
   {
     "id": "p-look-and-feel-3",
@@ -1331,7 +1466,11 @@
     ],
     "precioMin": 339177,
     "estado": "activo",
-    "imagen": "/images/projects/p-look-and-feel-3.webp"
+    "imagen": "/images/projects/p-look-and-feel-3.webp",
+    "ubicacion": {
+      "lat": -12.1087781,
+      "lng": -76.972578
+    }
   },
   {
     "id": "p-pacifico-299",
@@ -1372,7 +1511,8 @@
     ],
     "precioMin": 755720,
     "estado": "activo",
-    "imagen": "/images/projects/p-pacifico-299.webp"
+    "imagen": "/images/projects/p-pacifico-299.webp",
+    "ubicacion": null
   },
   {
     "id": "p-element",
@@ -1413,7 +1553,11 @@
     ],
     "precioMin": 294058,
     "estado": "activo",
-    "imagen": "/images/projects/p-element.webp"
+    "imagen": "/images/projects/p-element.webp",
+    "ubicacion": {
+      "lat": -12.1263165,
+      "lng": -77.0027456
+    }
   },
   {
     "id": "p-marsano-park",
@@ -1450,7 +1594,11 @@
     ],
     "precioMin": 314186.34,
     "estado": "activo",
-    "imagen": "/images/projects/p-marsano-park.webp"
+    "imagen": "/images/projects/p-marsano-park.webp",
+    "ubicacion": {
+      "lat": -12.1196972,
+      "lng": -77.0070204
+    }
   },
   {
     "id": "p-morar",
@@ -1489,6 +1637,10 @@
     ],
     "precioMin": 499000,
     "estado": "activo",
-    "imagen": "/images/projects/p-morar.webp"
+    "imagen": "/images/projects/p-morar.webp",
+    "ubicacion": {
+      "lat": -12.1263165,
+      "lng": -77.0027456
+    }
   }
 ]

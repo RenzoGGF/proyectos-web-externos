@@ -1,15 +1,18 @@
+// scripts/import-excel.ts
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { z } from 'zod';
 import type { Advisor, Company, Etapa, Estado, FechaEntrega, Project } from '../src/types/index';
 import { generateSlug } from '../src/utils/slug';
+import { defaultGeocoder } from './geocoding';
 
 const require = createRequire(import.meta.url);
 const XLSX = require('xlsx');
 
 const EXCEL_PATH = path.resolve(process.cwd(), 'data/proyectos.xlsx');
 const DATA_DIR = path.resolve(process.cwd(), 'src/data');
+const PROJECTS_JSON_PATH = path.join(DATA_DIR, 'projects.json');
 
 // ==========================================
 // ESQUEMAS DE VALIDACIÓN ZOD
@@ -31,6 +34,11 @@ const FechaEntregaSchema = z.object({
   texto: z.string(),
   anio: z.number().int().min(2020).max(2100),
   trimestre: z.number().int().min(1).max(4).nullable()
+}).nullable().optional();
+
+const UbicacionSchema = z.object({
+  lat: z.number(),
+  lng: z.number()
 }).nullable().optional();
 
 const ProjectSchema = z.object({
@@ -59,7 +67,8 @@ const ProjectSchema = z.object({
   areaMax: z.number().min(0).optional(),
   precioMin: z.number().min(0).optional(),
   estado: z.enum(['activo', 'vencido']).default('activo'),
-  imagen: z.string().min(1)
+  imagen: z.string().min(1),
+  ubicacion: UbicacionSchema
 });
 
 // ==========================================
@@ -175,11 +184,11 @@ function getRowValue(row: Record<string, unknown>, possibleKeys: string[]): unkn
 // PROCESAMIENTO PRINCIPAL
 // ==========================================
 
-function runImport(): void {
-  console.log('🚀 Iniciando proceso de importación Excel -> JSON...');
+async function runImport(): Promise<void> {
+  console.log('[INICIO] Proceso de importación Excel -> JSON...');
 
   if (!fs.existsSync(EXCEL_PATH)) {
-    console.error(`❌ Error crítico: No se encontró el archivo de origen en "${EXCEL_PATH}".`);
+    console.error(`[ERROR CRITICO] No se encontró el archivo de origen en "${EXCEL_PATH}".`);
     process.exit(1);
   }
 
@@ -190,8 +199,19 @@ function runImport(): void {
   const rawRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' }) as Record<string, unknown>[];
 
   if (rawRows.length === 0) {
-    console.error('❌ Error crítico: El archivo Excel está vacío.');
+    console.error('[ERROR CRITICO] El archivo Excel está vacío.');
     process.exit(1);
+  }
+
+  // Cargar proyectos existentes para geocodificación incremental
+  const existingProjectsMap = new Map<string, Project>();
+  if (fs.existsSync(PROJECTS_JSON_PATH)) {
+    try {
+      const existingData = JSON.parse(fs.readFileSync(PROJECTS_JSON_PATH, 'utf-8')) as Project[];
+      existingData.forEach((p) => existingProjectsMap.set(p.id, p));
+    } catch {
+      console.warn('[AVISO] No se pudo leer projects.json previo. Se geocodificará de cero.');
+    }
   }
 
   const advisorsMap = new Map<string, Advisor>();
@@ -201,7 +221,6 @@ function runImport(): void {
 
   const warnings: string[] = [];
   const errors: string[] = [];
-
   const usedSlugs = new Set<string>();
 
   rawRows.forEach((row: Record<string, unknown>, index: number) => {
@@ -314,7 +333,8 @@ function runImport(): void {
       banos: parseRange(getRowValue(row, ['RANGO DE BAÑOS', 'BAÑOS', 'BANOS'])),
       precioMin: parseNumber(getRowValue(row, ['PRECIO MINIMO S/', 'PRECIO MÍNIMO S/', 'PRECIO MINIMO', 'PRECIO MÍNIMO'])),
       estado: parseEstado(getRowValue(row, ['ESTADO'])),
-      imagen: `/images/projects/${projectId}.webp`
+      imagen: `/images/projects/${projectId}.webp`,
+      ubicacion: null
     };
 
     const projectVal = ProjectSchema.safeParse(projectObj);
@@ -328,15 +348,67 @@ function runImport(): void {
   });
 
   if (warnings.length > 0) {
-    console.warn('\n⚠️ ADVERTENCIAS DETECTADAS (Proceso continuado):');
+    console.warn('\n[ADVERTENCIAS DETECTADAS]');
     warnings.forEach((w: string) => console.warn(`  - ${w}`));
   }
 
   if (errors.length > 0) {
-    console.error('\n❌ ERRORES CRÍTICOS EN EL EXCEL (Importaciones abortadas):');
+    console.error('\n[ERRORES CRITICOS EN EL EXCEL]');
     errors.forEach((e: string) => console.error(`  - ${e}`));
-    console.error('\nPor favor, corrige el archivo Excel y vuelve a ejecutar "npm run data:import".\n');
+    console.error('\nPor favor, corrige el archivo Excel y vuelve a ejecutar la importación.\n');
     process.exit(1);
+  }
+
+  // ==========================================
+  // GEOCODIFICACIÓN SECUENCIAL E INCREMENTAL
+  // ==========================================
+  console.log('\n[GEOCODIFICACION] Comprobando coordenadas con Nominatim...');
+  let conservadosCount = 0;
+  let geocodificadosCount = 0;
+  let sinUbicacionCount = 0;
+
+  for (const project of projects) {
+    const existing = existingProjectsMap.get(project.id);
+
+    const prevDir = (existing?.direccion || '').trim().toLowerCase();
+    const currDir = (project.direccion || '').trim().toLowerCase();
+    const prevDist = (existing?.distrito || '').trim().toLowerCase();
+    const currDist = (project.distrito || '').trim().toLowerCase();
+
+    const direccionNoCambio = prevDir === currDir && prevDist === currDist;
+    const yaTieneCoords = existing?.ubicacion && 
+      typeof existing.ubicacion.lat === 'number' && 
+      typeof existing.ubicacion.lng === 'number';
+
+    // 1. Conservar coordenadas si existen y la dirección no cambió
+    if (existing && yaTieneCoords && direccionNoCambio) {
+      project.ubicacion = existing.ubicacion;
+      conservadosCount++;
+      continue;
+    }
+
+    // 2. Si no tiene dirección asignada
+    if (!project.direccion) {
+      project.ubicacion = null;
+      sinUbicacionCount++;
+      console.warn(`[WARN GEO] Proyecto "${project.nombre}" (${project.id}) no tiene dirección especificada. Ubicación asignada como null.`);
+      continue;
+    }
+
+    // 3. Geocodificar de forma secuencial
+    process.stdout.write(`  -> Geocodificando "${project.nombre}" (${project.direccion}, ${project.distrito})... `);
+    const coords = await defaultGeocoder.geocode(project.direccion, project.distrito);
+
+    if (coords) {
+      project.ubicacion = coords;
+      geocodificadosCount++;
+      console.log(`[OK] (${coords.lat}, ${coords.lng})`);
+    } else {
+      project.ubicacion = null;
+      sinUbicacionCount++;
+      console.log('[FALLO]');
+      console.warn(`[WARN GEO] No se pudo geocodificar "${project.nombre}" en "${project.direccion}, ${project.distrito}". Ubicación asignada como null.`);
+    }
   }
 
   if (!fs.existsSync(DATA_DIR)) {
@@ -350,10 +422,19 @@ function runImport(): void {
   fs.writeFileSync(path.join(DATA_DIR, 'companies.json'), JSON.stringify(companiesArray, null, 2), 'utf-8');
   fs.writeFileSync(path.join(DATA_DIR, 'projects.json'), JSON.stringify(projects, null, 2), 'utf-8');
 
-  console.log('\n✅ IMPORTACIÓN COMPLETADA CON ÉXITO:');
-  console.log(`  - ${projects.length} proyectos procesados en "src/data/projects.json"`);
-  console.log(`  - ${advisorsArray.length} asesores guardados en "src/data/advisors.json"`);
-  console.log(`  - ${companiesArray.length} empresas guardadas en "src/data/companies.json"\n`);
+  console.log('\n======================================================');
+  console.log('            RESUMEN DE IMPORTACIÓN Y DATOS            ');
+  console.log('======================================================');
+  console.log(`  - Total de proyectos procesados:          ${projects.length}`);
+  console.log(`  - Coordenadas conservadas (sin cambios):  ${conservadosCount}`);
+  console.log(`  - Proyectos geocodificados con éxito:     ${geocodificadosCount}`);
+  console.log(`  - Proyectos que quedaron sin ubicación:   ${sinUbicacionCount}`);
+  console.log(`  - Asesores guardados:                     ${advisorsArray.length}`);
+  console.log(`  - Empresas guardadas:                     ${companiesArray.length}`);
+  console.log('======================================================\n');
 }
 
-runImport();
+runImport().catch((err) => {
+  console.error('[ERROR INESPERADO]', err);
+  process.exit(1);
+});

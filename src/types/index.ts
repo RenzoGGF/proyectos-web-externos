@@ -1,6 +1,11 @@
 export type Etapa = 'en_planos' | 'en_construccion' | 'entrega_inmediata';
 export type Estado = 'activo' | 'vencido';
 
+export interface ProjectUbicacion {
+  lat: number;
+  lng: number;
+}
+
 export interface FechaEntrega {
   texto: string;
   anio: number;
@@ -43,6 +48,7 @@ export interface Project {
   precioMin?: number;
   estado: Estado;
   imagen: string;
+  ubicacion?: ProjectUbicacion | null;
 }
 
 export interface ProjectDetailed extends Omit<Project, 'asesorId' | 'empresaId'> {
