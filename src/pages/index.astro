@@ -137,6 +137,7 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
     const noResultsEl = document.getElementById('no-results');
     const chipsContainer = document.getElementById('active-chips-container');
     const chipsList = document.getElementById('chips-list');
+    const filterActiveBadge = document.getElementById('filter-active-badge');
     const btnBackToTop = document.getElementById('btn-back-to-top');
 
     const CURRENT_YEAR = new Date().getFullYear();
@@ -246,7 +247,7 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
 
       roomCheckboxes.forEach((cb) => {
         if (cb.checked) {
-          const labelText = cb.value === '0' ? 'Oficina / Local / Otros' : (cb.value === '1' ? '1 habitación' : `${cb.value} habitaciones`);
+          const labelText = cb.value === '0' ? 'Oficinas y locales' : (cb.value === '1' ? '1 habitación' : `${cb.value} habitaciones`);
           chips.push({
             label: labelText,
             clear: () => { cb.checked = false; applyFiltersAndSort(); }
@@ -264,8 +265,19 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
           chipEl.addEventListener('click', chip.clear);
           chipsList.appendChild(chipEl);
         });
+
+        if (filterActiveBadge) {
+          filterActiveBadge.textContent = String(chips.length);
+          filterActiveBadge.classList.remove('hidden');
+        }
+        btnReset?.classList.remove('is-disabled');
       } else {
         chipsContainer.classList.add('hidden');
+
+        if (filterActiveBadge) {
+          filterActiveBadge.classList.add('hidden');
+        }
+        btnReset?.classList.add('is-disabled');
       }
     }
 
@@ -481,6 +493,8 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
 
     if (initialQuery) {
       applyFiltersAndSort();
+    } else {
+      updateActiveChips();
     }
   });
 </script>

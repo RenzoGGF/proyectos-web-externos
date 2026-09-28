@@ -34,13 +34,14 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
 <aside class="filter-sidebar">
   <div class="filter-container">
     <div class="filter-bar-header">
-      <button type="button" id="btn-toggle-filters" class="toggle-btn" aria-expanded="true">
+      <button type="button" id="btn-toggle-filters" class="toggle-btn" aria-expanded="false">
         <SlidersHorizontal size={16} />
-        <span class="btn-text">Filtros de Búsqueda</span>
+        <span class="btn-text">Filtros</span>
+        <span id="filter-active-badge" class="filter-count-badge hidden" aria-label="Filtros activos">0</span>
         <ChevronDown size={16} class="toggle-icon" id="toggle-icon" />
       </button>
 
-      <button type="button" id="btn-reset-filters" class="btn-reset">
+      <button type="button" id="btn-reset-filters" class="btn-reset is-disabled" title="Limpiar todos los filtros">
         <RotateCcw size={13} />
         <span>Limpiar</span>
       </button>
@@ -72,7 +73,12 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
 
         <!-- 3. Rango de Precios -->
         <div class="filter-group">
-          <label class="filter-label">Precio (S/)</label>
+          <div class="filter-group-header">
+            <label class="filter-label">Precio</label>
+            <span class="filter-range-display" id="precio-range-display">
+              {formatSoles(minPriceRounded)} – {formatSoles(maxPriceRounded)}
+            </span>
+          </div>
 
           <div class="shadcn-slider-root" id="slider-precio-root">
             <div class="shadcn-slider-track">
@@ -109,7 +115,12 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
 
         <!-- 4. Rango de Entrega -->
         <div class="filter-group">
-          <label class="filter-label">Año de Entrega</label>
+          <div class="filter-group-header">
+            <label class="filter-label">Año de Entrega</label>
+            <span class="filter-range-display" id="anio-range-display">
+              {minYear} – {maxYear}
+            </span>
+          </div>
 
           <div class="shadcn-slider-root" id="slider-anio-root">
             <div class="shadcn-slider-track">
@@ -144,21 +155,34 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
           </div>
         </div>
 
-        <!-- 6. Habitaciones / Espacio -->
-        <div class="filter-group-rooms">
-          <span class="filter-label">Habitaciones / Espacio</span>
-          <div class="checkbox-stack">
-            {[1, 2, 3, 4].map((num) => (
-              <label class="checkbox-label">
-                <input type="checkbox" name="filter-rooms" value={num} class="filter-checkbox" />
-                <span>{num === 4 ? '4 a más habitaciones' : `${num} ${num === 1 ? 'habitación' : 'habitaciones'}`}</span>
-              </label>
-            ))}
-            <label class="checkbox-label">
-              <input type="checkbox" name="filter-rooms" value="0" class="filter-checkbox" />
-              <span>Oficina / Local / Otros</span>
+        <!-- 5. Dormitorios y Otros Espacios (Opción B) -->
+        <div class="filter-group filter-group-rooms">
+          <div class="filter-group-header">
+            <span class="filter-label">Dormitorios</span>
+          </div>
+          <div class="room-pill-grid">
+            <label class="room-pill">
+              <input type="checkbox" name="filter-rooms" value="1" class="room-pill-input" />
+              <span class="room-pill-btn">1</span>
+            </label>
+            <label class="room-pill">
+              <input type="checkbox" name="filter-rooms" value="2" class="room-pill-input" />
+              <span class="room-pill-btn">2</span>
+            </label>
+            <label class="room-pill">
+              <input type="checkbox" name="filter-rooms" value="3" class="room-pill-input" />
+              <span class="room-pill-btn">3</span>
+            </label>
+            <label class="room-pill">
+              <input type="checkbox" name="filter-rooms" value="4" class="room-pill-input" />
+              <span class="room-pill-btn">4+</span>
             </label>
           </div>
+
+          <label class="special-space-label">
+            <input type="checkbox" name="filter-rooms" value="0" class="special-space-checkbox" />
+            <span class="special-space-text">Oficinas y locales comerciales</span>
+          </label>
         </div>
       </div>
     </div>
@@ -172,10 +196,11 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
     const toggleIcon = document.getElementById('toggle-icon');
 
     btnToggle?.addEventListener('click', () => {
+      if (window.innerWidth >= 1024) return;
       if (filterContent && toggleIcon) {
-        const isCollapsed = filterContent.classList.toggle('is-collapsed');
-        toggleIcon.classList.toggle('is-rotated', isCollapsed);
-        btnToggle.setAttribute('aria-expanded', String(!isCollapsed));
+        const isExpanded = filterContent.classList.toggle('is-expanded-mobile');
+        toggleIcon.classList.toggle('is-rotated', isExpanded);
+        btnToggle.setAttribute('aria-expanded', String(isExpanded));
       }
     });
 
@@ -186,6 +211,7 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
       tooltipMinId: string;
       tooltipMaxId: string;
       formatFn: (v: number) => string;
+      onUpdate?: (minVal: number, maxVal: number, minLimit: number, maxLimit: number) => void;
     }) {
       const minInput = document.getElementById(config.minInputId) as HTMLInputElement | null;
       const maxInput = document.getElementById(config.maxInputId) as HTMLInputElement | null;
@@ -214,8 +240,6 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
         // RESOLUCIÓN DE CRUCES Y RANGOS COLAPSADOS EN EL MISMO VALOR
         if (minVal > maxVal) {
           if (event?.target === minInput) {
-            // Si estaban juntos y se arrastró el selector mínimo hacia la derecha,
-            // se transfiere el valor al selector máximo
             if (lastMinVal === lastMaxVal) {
               maxInput.value = String(minVal);
               minInput.value = String(lastMinVal);
@@ -231,8 +255,6 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
               minVal = maxVal;
             }
           } else if (event?.target === maxInput) {
-            // Si estaban juntos y se arrastró el selector máximo hacia la izquierda,
-            // se transfiere el valor al selector mínimo
             if (lastMinVal === lastMaxVal) {
               minInput.value = String(maxVal);
               maxInput.value = String(lastMaxVal);
@@ -289,11 +311,26 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
           minInput.style.zIndex = '3';
           maxInput.style.zIndex = '5';
         }
+
+        config.onUpdate?.(minVal, maxVal, minLimit, maxLimit);
       }
 
       // GESTIÓN DINÁMICA DE Z-INDEX MEDIANTE PUNTERO (DESKTOP)
       const root = minInput.closest('.shadcn-slider-root') as HTMLElement | null;
       if (root) {
+        const startSliding = () => root.classList.add('is-sliding');
+        const stopSliding = () => root.classList.remove('is-sliding');
+
+        minInput.addEventListener('pointerdown', startSliding);
+        minInput.addEventListener('touchstart', startSliding, { passive: true });
+        minInput.addEventListener('focus', startSliding);
+        minInput.addEventListener('blur', stopSliding);
+
+        maxInput.addEventListener('pointerdown', startSliding);
+        maxInput.addEventListener('touchstart', startSliding, { passive: true });
+        maxInput.addEventListener('focus', startSliding);
+        maxInput.addEventListener('blur', stopSliding);
+
         root.addEventListener('pointermove', (e: PointerEvent) => {
           const minVal = parseFloat(minInput.value);
           const maxVal = parseFloat(maxInput.value);
@@ -301,7 +338,6 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
           const maxLimit = parseFloat(minInput.max);
           const totalSpan = maxLimit - minLimit || 1;
 
-          // Si los selectores están juntos o muy cerca, y no en extremos absolutos
           if (Math.abs(maxVal - minVal) / totalSpan < 0.06 && minVal > minLimit && minVal < maxLimit) {
             const rect = root.getBoundingClientRect();
             const cursorPercent = (e.clientX - rect.left) / rect.width;
@@ -338,6 +374,14 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
       return { update, reset };
     }
 
+    const stopAllSliding = () => {
+      document.querySelectorAll('.shadcn-slider-root.is-sliding').forEach((r) => r.classList.remove('is-sliding'));
+    };
+    window.addEventListener('pointerup', stopAllSliding);
+    window.addEventListener('touchend', stopAllSliding);
+    window.addEventListener('pointercancel', stopAllSliding);
+
+    const precioRangeDisplay = document.getElementById('precio-range-display');
     const priceSlider = setupDualSlider({
       minInputId: 'filter-precio-min',
       maxInputId: 'filter-precio-max',
@@ -345,8 +389,21 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
       tooltipMinId: 'tooltip-precio-min',
       tooltipMaxId: 'tooltip-precio-max',
       formatFn: (val) => `${val.toLocaleString('es-PE')}`,
+      onUpdate: (minVal, maxVal, minLimit, maxLimit) => {
+        if (!precioRangeDisplay) return;
+        if (minVal <= minLimit && maxVal >= maxLimit) {
+          precioRangeDisplay.textContent = `S/ ${minLimit.toLocaleString('es-PE')} – S/ ${maxLimit.toLocaleString('es-PE')}`;
+        } else if (minVal > minLimit && maxVal >= maxLimit) {
+          precioRangeDisplay.textContent = `Desde S/ ${minVal.toLocaleString('es-PE')}`;
+        } else if (minVal <= minLimit && maxVal < maxLimit) {
+          precioRangeDisplay.textContent = `Hasta S/ ${maxVal.toLocaleString('es-PE')}`;
+        } else {
+          precioRangeDisplay.textContent = `S/ ${minVal.toLocaleString('es-PE')} – S/ ${maxVal.toLocaleString('es-PE')}`;
+        }
+      }
     });
 
+    const anioRangeDisplay = document.getElementById('anio-range-display');
     const yearSlider = setupDualSlider({
       minInputId: 'filter-anio-min',
       maxInputId: 'filter-anio-max',
@@ -354,6 +411,18 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
       tooltipMinId: 'tooltip-anio-min',
       tooltipMaxId: 'tooltip-anio-max',
       formatFn: (val) => String(val),
+      onUpdate: (minVal, maxVal, minLimit, maxLimit) => {
+        if (!anioRangeDisplay) return;
+        if (minVal <= minLimit && maxVal >= maxLimit) {
+          anioRangeDisplay.textContent = `${minLimit} – ${maxLimit}`;
+        } else if (minVal > minLimit && maxVal >= maxLimit) {
+          anioRangeDisplay.textContent = `Desde ${minVal}`;
+        } else if (minVal <= minLimit && maxVal < maxLimit) {
+          anioRangeDisplay.textContent = `Hasta ${maxVal}`;
+        } else {
+          anioRangeDisplay.textContent = `${minVal} – ${maxVal}`;
+        }
+      }
     });
 
     const selects = document.querySelectorAll<HTMLSelectElement>('.filter-select');
@@ -416,7 +485,7 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
     border: none;
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.45rem;
     font-size: 0.92rem;
     font-weight: 800;
     color: var(--color-remax-blue);
@@ -426,51 +495,115 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
     transition: background-color 0.2s ease;
   }
 
-  .toggle-btn:hover {
-    background-color: #eff6ff;
+  .filter-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #ffffff;
+    background-color: var(--color-remax-blue);
+    border-radius: 9999px;
+    line-height: 1;
   }
 
   .toggle-icon {
     transition: transform 0.25s ease;
-    transform: rotate(180deg);
+    color: var(--color-text-muted);
   }
 
-  .toggle-icon.is-rotated {
-    transform: rotate(0deg);
+  @media (max-width: 1023px) {
+    .toggle-btn:hover {
+      background-color: #eff6ff;
+    }
+    .filter-content {
+      display: none;
+    }
+    .filter-content.is-expanded-mobile {
+      display: block;
+      animation: filterSlideDown 0.2s ease-out;
+    }
+    .toggle-icon {
+      transform: rotate(0deg);
+    }
+    .toggle-icon.is-rotated {
+      transform: rotate(180deg);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .filter-content {
+      display: block !important;
+    }
+    .toggle-btn {
+      cursor: default;
+      pointer-events: none;
+    }
+    .toggle-icon {
+      display: none;
+    }
+  }
+
+  @keyframes filterSlideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .btn-reset {
-    background-color: var(--color-remax-red);
-    color: #ffffff;
-    border: none;
-    font-size: 0.78rem;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 0.30rem 0.5rem;
-    border-radius: var(--radius-md);
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    box-shadow: 0 2px 6px rgba(220, 28, 46, 0.2);
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.28rem 0.55rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
   }
 
-  .btn-reset:hover {
-    background-color: #b91c1c;
+  .btn-reset.is-disabled {
+    background-color: transparent;
+    color: var(--color-text-muted);
+    border-color: transparent;
+    opacity: 0.45;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .btn-reset:not(.is-disabled) {
+    background-color: #fee2e2;
+    color: var(--color-remax-red);
+    border-color: #fca5a5;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(220, 28, 46, 0.15);
+  }
+
+  .btn-reset:not(.is-disabled):hover {
+    background-color: var(--color-remax-red);
+    color: #ffffff;
+    border-color: var(--color-remax-red);
+    box-shadow: 0 2px 8px rgba(220, 28, 46, 0.25);
+    transform: translateY(-1px);
   }
 
   .filter-content {
     padding: 1.15rem;
   }
 
-  .filter-content.is-collapsed {
-    display: none;
-  }
-
   .filter-stack {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.05rem;
   }
 
   .filter-group {
@@ -479,10 +612,26 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
     gap: 0.55rem;
   }
 
+  .filter-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
   .filter-label {
     font-size: 0.78rem;
     font-weight: 700;
     color: var(--color-text-muted);
+  }
+
+  .filter-range-display {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-remax-blue);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
   }
 
   .shadcn-slider-root {
@@ -493,13 +642,13 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
     align-items: center;
     user-select: none;
     touch-action: none;
-    margin-bottom: 1.6rem; /* Se traslada el margen hacia abajo para dar espacio al tooltip */
+    margin-bottom: 0.85rem;
   }
 
   .shadcn-tooltip {
     position: absolute;
-    top: calc(100% + 5px); /* Ahora se posiciona debajo del track */
-    transform: translateX(-50%);
+    top: calc(100% + 5px);
+    transform: translateX(-50%) translateY(3px);
     background-color: #0f172a;
     color: #f8fafc;
     font-size: 0.68rem;
@@ -509,16 +658,25 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
     border-radius: 4px;
     white-space: nowrap;
     pointer-events: none;
-    opacity: 1;
-    visibility: visible;
+    opacity: 0;
+    visibility: hidden;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
     z-index: 10;
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  }
+
+  .shadcn-slider-root.is-sliding .shadcn-tooltip,
+  .shadcn-slider-thumb-input:active ~ .shadcn-tooltip,
+  .shadcn-slider-thumb-input:focus-visible ~ .shadcn-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
   }
 
   .shadcn-tooltip::after {
     content: '';
     position: absolute;
-    bottom: 100%; /* La flecha apunta hacia arriba, conectando con el slider */
+    bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
     border-width: 0 4px 4px 4px;
@@ -561,11 +719,11 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
   .shadcn-slider-thumb-input::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     border-radius: 9999px;
     background-color: #ffffff;
-    border: 2px solid var(--color-remax-blue);
+    border: 2.5px solid var(--color-remax-blue);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1);
     cursor: grab;
     pointer-events: auto;
@@ -586,11 +744,11 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
   }
 
   .shadcn-slider-thumb-input::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     border-radius: 9999px;
     background-color: #ffffff;
-    border: 2px solid var(--color-remax-blue);
+    border: 2.5px solid var(--color-remax-blue);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1);
     cursor: grab;
     pointer-events: auto;
@@ -664,33 +822,101 @@ const formatSoles = (val: number) => `S/ ${val.toLocaleString('es-PE')}`;
     background-color: #ffffff;
   }
 
+  /* SELECTOR DE DORMITORIOS Y ESPACIOS (OPCIÓN B) */
   .filter-group-rooms {
     padding-top: 0.75rem;
     border-top: 1px dashed #e2e8f0;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.6rem;
   }
 
-  .checkbox-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+  .room-pill-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem;
   }
 
-  .checkbox-label {
+  .room-pill {
+    position: relative;
+    display: block;
+    user-select: none;
+  }
+
+  .room-pill-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .room-pill-btn {
     display: flex;
     align-items: center;
+    justify-content: center;
+    padding: 0.45rem 0.2rem;
+    min-height: 36px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-main);
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+  }
+
+  .room-pill:hover .room-pill-btn {
+    border-color: #cbd5e1;
+    background-color: #f8fafc;
+  }
+
+  .room-pill-input:checked + .room-pill-btn {
+    background-color: #eff6ff;
+    color: var(--color-remax-blue);
+    border-color: var(--color-remax-blue);
+    box-shadow: 0 0 0 1px var(--color-remax-blue);
+    font-weight: 800;
+  }
+
+  .room-pill-input:focus-visible + .room-pill-btn {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 61, 165, 0.25);
+  }
+
+  .special-space-label {
+    display: inline-flex;
+    align-items: center;
     gap: 0.5rem;
-    font-size: 0.82rem;
-    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    padding-top: 0.15rem;
+  }
+
+  .special-space-checkbox {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    accent-color: var(--color-remax-blue);
     cursor: pointer;
   }
 
-  .filter-checkbox {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--color-remax-blue);
-    cursor: pointer;
+  .special-space-text {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    transition: color 0.15s ease;
+  }
+
+  .special-space-label:hover .special-space-text {
+    color: var(--color-text-main);
+  }
+
+  .special-space-checkbox:checked ~ .special-space-text {
+    color: var(--color-remax-blue);
+    font-weight: 600;
   }
 </style>

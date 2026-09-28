@@ -144,7 +144,7 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
   <Header />
 
   <main class="container page-main">
-    <a href="/" class="back-link">
+    <a href="/" class="back-link" id="back-link">
       <ArrowLeft size={16} />
       <span>Volver al catálogo</span>
     </a>
@@ -198,99 +198,114 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
 
         <div class="info-sidebar">
           <h3>Información del Proyecto</h3>
-          <ul class="info-list">
+
+          <!-- MATRIZ DE DATOS CLAVE (QUICK STATS) -->
+          <div class="specs-quick-grid">
             {project.etapa && (
-              <li>
-                <span class="info-label">
-                  <Layers size={16} class="field-icon" />
-                  <span>Etapa:</span>
+              <div class="spec-cell">
+                <span class="spec-cell-label">
+                  <Layers size={14} class="cell-icon" />
+                  <span>Etapa</span>
                 </span>
-                <strong>{etapaLabelMap[project.etapa]}</strong>
-              </li>
+                <strong class="spec-cell-value">{etapaLabelMap[project.etapa]}</strong>
+              </div>
             )}
 
             {project.fechaEntrega && (
-              <li>
-                <span class="info-label">
-                  <CalendarDays size={16} class="field-icon" />
-                  <span>Entrega:</span>
+              <div class="spec-cell">
+                <span class="spec-cell-label">
+                  <CalendarDays size={14} class="cell-icon" />
+                  <span>Entrega</span>
                 </span>
-                <strong>{project.fechaEntrega.texto}</strong>
-              </li>
-            )}
-
-            {project.financiamiento && project.financiamiento.length > 0 && (
-              <li>
-                <span class="info-label">
-                  <Landmark size={16} class="field-icon" />
-                  <span>Financiamiento:</span>
-                </span>
-                <strong>{project.financiamiento.join(', ')}</strong>
-              </li>
-            )}
-
-            {project.tipologia && project.tipologia.length > 0 && (
-              <li>
-                <span class="info-label">
-                  <LayoutGrid size={16} class="field-icon" />
-                  <span>Tipología:</span>
-                </span>
-                <strong>{project.tipologia.join(', ')}</strong>
-              </li>
+                <strong class="spec-cell-value">{project.fechaEntrega.texto}</strong>
+              </div>
             )}
 
             {project.habitaciones && project.habitaciones.length > 0 && (
-              <li>
-                <span class="info-label">
-                  <Bed size={16} class="field-icon" />
-                  <span>Habitaciones:</span>
+              <div class="spec-cell">
+                <span class="spec-cell-label">
+                  <Bed size={14} class="cell-icon" />
+                  <span>Dormitorios</span>
                 </span>
-                <strong>{project.habitaciones.join(', ')} hab.</strong>
-              </li>
-            )}
-
-            {project.banos && project.banos.length > 0 && (
-              <li>
-                <span class="info-label">
-                  <Bath size={16} class="field-icon" />
-                  <span>Baños:</span>
-                </span>
-                <strong>{project.banos.join(', ')} baños</strong>
-              </li>
+                <strong class="spec-cell-value">{project.habitaciones.join(', ')} hab.</strong>
+              </div>
             )}
 
             {project.areaMin && (
-              <li>
-                <span class="info-label">
-                  <Ruler size={16} class="field-icon" />
-                  <span>Área:</span>
+              <div class="spec-cell">
+                <span class="spec-cell-label">
+                  <Ruler size={14} class="cell-icon" />
+                  <span>Área</span>
                 </span>
-                <strong>
+                <strong class="spec-cell-value">
                   {project.areaMin} m²{project.areaMax ? ` - ${project.areaMax} m²` : ''}
                 </strong>
-              </li>
+              </div>
             )}
+          </div>
 
-            {project.pisosProyecto !== undefined && (
-              <li>
-                <span class="info-label">
-                  <Building2 size={16} class="field-icon" />
-                  <span>Pisos del proyecto:</span>
-                </span>
-                <strong>{project.pisosProyecto} pisos</strong>
-              </li>
-            )}
+          <!-- DETALLES COMPLEMENTARIOS -->
+          {(
+            (project.banos && project.banos.length > 0) ||
+            (project.pisosProyecto !== undefined) ||
+            (project.disponibles !== undefined) ||
+            (project.financiamiento && project.financiamiento.length > 0) ||
+            (project.tipologia && project.tipologia.length > 0)
+          ) && (
+            <div class="specs-secondary-box">
+              <ul class="specs-secondary-list">
+                {project.banos && project.banos.length > 0 && (
+                  <li>
+                    <span class="info-label">
+                      <Bath size={14} class="field-icon" />
+                      <span>Baños:</span>
+                    </span>
+                    <strong>{project.banos.join(', ')} baños</strong>
+                  </li>
+                )}
 
-            {project.disponibles !== undefined && (
-              <li>
-                <span class="info-label">
-                  <KeyRound size={16} class="field-icon" />
-                  <span>Unidades disponibles:</span>
-                </span>
-                <strong>≤ {project.disponibles}</strong>
-              </li>
-            )}
-          </ul>
+                {project.pisosProyecto !== undefined && (
+                  <li>
+                    <span class="info-label">
+                      <Building2 size={14} class="field-icon" />
+                      <span>Pisos:</span>
+                    </span>
+                    <strong>{project.pisosProyecto} pisos</strong>
+                  </li>
+                )}
+
+                {project.financiamiento && project.financiamiento.length > 0 && (
+                  <li>
+                    <span class="info-label">
+                      <Landmark size={14} class="field-icon" />
+                      <span>Financiamiento:</span>
+                    </span>
+                    <strong>{project.financiamiento.join(', ')}</strong>
+                  </li>
+                )}
+
+                {project.tipologia && project.tipologia.length > 0 && (
+                  <li>
+                    <span class="info-label">
+                      <LayoutGrid size={14} class="field-icon" />
+                      <span>Tipología:</span>
+                    </span>
+                    <strong>{project.tipologia.join(', ')}</strong>
+                  </li>
+                )}
+
+                {project.disponibles !== undefined && (
+                  <li>
+                    <span class="info-label">
+                      <KeyRound size={14} class="field-icon" />
+                      <span>Disponibles:</span>
+                    </span>
+                    <strong>≤ {project.disponibles}</strong>
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
 
           {advisor && (
             <div class="advisor-card">
@@ -298,10 +313,10 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
                 <h4>Asesor Responsable</h4>
                 <p class="advisor-name">{advisor.nombre}</p>
                 {advisor.telefono && (
-                  <p class="advisor-phone">
-                    <Phone size={15} />
+                  <a href={`tel:${advisor.telefono.replace(/\s+/g, '')}`} class="advisor-phone-link" title={`Llamar a ${advisor.nombre}`}>
+                    <Phone size={14} />
                     <span>{advisor.telefono}</span>
-                  </p>
+                  </a>
                 )}
               </div>
 
@@ -429,6 +444,17 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
             <Navigation size={18} class="section-icon" />
             <h3>Ubicación aproximada</h3>
           </div>
+
+          <a 
+            href={`https://maps.google.com/maps?q=${queryMapa}`} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="bottom-card-action-btn"
+            title="Abrir en Google Maps"
+          >
+            <ExternalLink size={14} />
+            <span>Abrir en Google Maps</span>
+          </a>
         </div>
 
         <div class="map-container">
@@ -483,6 +509,14 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Retorno contextual (si el asesor vino navegando desde /mapa)
+    const backLink = document.getElementById('back-link') as HTMLAnchorElement | null;
+    if (backLink && document.referrer && document.referrer.includes('/mapa')) {
+      backLink.href = '/mapa';
+      const backText = backLink.querySelector('span');
+      if (backText) backText.textContent = 'Volver al mapa';
+    }
+
     const modal = document.getElementById('stock-modal');
     const backdrop = document.getElementById('modal-backdrop');
     const btnOpenModal = document.getElementById('btn-open-stock-modal');
