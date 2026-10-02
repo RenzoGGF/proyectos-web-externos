@@ -153,6 +153,14 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
       searchInput.value = initialQuery;
     }
 
+    function normalizeText(text: string): string {
+      return text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+    }
+
     function updateActiveChips() {
       if (!chipsContainer || !chipsList) return;
       chipsList.innerHTML = '';
@@ -312,7 +320,8 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
     }
 
     function applyFiltersAndSort() {
-      const searchVal = (searchInput?.value || '').trim().toLowerCase();
+      const searchVal = normalizeText(searchInput?.value || '');
+      const searchTokens = searchVal.split(/\s+/).filter(Boolean);
       const distritoVal = distritoSelect?.value.toLowerCase() || '';
       const etapaVal = etapaSelect?.value || '';
 
@@ -361,9 +370,9 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
       let visibleCount = 0;
 
       cards.forEach((card) => {
-        const cardNombre = (card.dataset.nombre || '').toLowerCase();
+        const cardNombre = normalizeText(card.dataset.nombre || '');
         const cardDistrito = card.dataset.distrito || '';
-        const cardEmpresa = card.dataset.empresa || '';
+        const cardEmpresa = normalizeText(card.dataset.empresa || '');
         const cardEtapa = card.dataset.etapa || '';
         const cardPrecio = parseFloat(card.dataset.precio || '0');
         const cardAnio = parseInt(card.dataset.anio || '0', 10);
@@ -373,7 +382,9 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
           .map((n) => parseInt(n, 10))
           .filter((n) => !isNaN(n));
 
-        const matchesNombre = !searchVal || cardNombre.includes(searchVal);
+        const matchesSearch = searchTokens.length === 0 || searchTokens.every((token) =>
+          cardNombre.includes(token) || cardEmpresa.includes(token)
+        );
         const matchesDistrito = !distritoVal || cardDistrito === distritoVal;
         const matchesEtapa = !etapaVal || cardEtapa === etapaVal;
 
@@ -402,7 +413,7 @@ const maxPrecioDetectado = preciosValidos.length > 0 ? Math.max(...preciosValido
           });
         }
 
-        const isVisible = matchesNombre && matchesDistrito && matchesEtapa && matchesPrecio && matchesAnio && matchesHabitaciones;
+        const isVisible = matchesSearch && matchesDistrito && matchesEtapa && matchesPrecio && matchesAnio && matchesHabitaciones;
 
         if (isVisible) {
           card.classList.remove('hidden');

@@ -48,7 +48,7 @@ const dataEntregaOrden = project.etapa === 'entrega_inmediata'
   class="project-card"
   data-nombre={project.nombre.toLowerCase()}
   data-distrito={project.distrito.toLowerCase()}
-  data-empresa={project.empresaId.toLowerCase()}
+  data-empresa={`${project.empresaId} ${company?.nombre || ''}`.toLowerCase()}
   data-etapa={project.etapa || ''}
   data-habitaciones={dataHabitaciones}
   data-precio={project.precioMin || 0}
