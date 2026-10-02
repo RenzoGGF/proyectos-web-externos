@@ -30,7 +30,7 @@ export const COMPANY_DRIVE_TUTORIALS: Record<string, Tutorial> = {
   'c-illusione-constructora-e-inmobiliaria-sac': {
     id: 'drive-illusione',
     titulo: '¿Cómo usar el Drive de Illusione?',
-    youtubeId: ''
+    youtubeId: 'b0dZaxhM3Hk'
   }
 };
 

@@ -683,6 +683,7 @@
 
 /* CONTENEDOR GMAPS */
 .map-container {
+  position: relative;
   width: 100%;
   height: 280px;
   border-radius: var(--radius-md);
@@ -702,6 +703,17 @@
   height: 100%;
   border: none;
   display: block;
+  pointer-events: none;
+}
+
+.map-click-shield {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: block;
+  cursor: pointer;
+  text-decoration: none;
+  background-color: transparent;
 }
 
 /* MODAL LIGHTBOX DE STOCK */

@@ -349,7 +349,8 @@ const mapPayload = projectsWithLocation.map((p) => {
   .map-page-wrapper {
     position: relative;
     width: 100%;
-    height: calc(100vh - 70px);
+    height: calc(100vh - 72px);
+    height: calc(100dvh - 72px);
     overflow: hidden;
   }
 
@@ -514,12 +515,14 @@ const mapPayload = projectsWithLocation.map((p) => {
 
   .btn-map-locate.is-locating {
     animation: locate-pulse 1.2s infinite ease-in-out;
+    color: var(--color-remax-red, #dc1c2e);
+    border-color: var(--color-remax-red, #dc1c2e);
   }
 
   .btn-map-locate.is-located {
-    background-color: #eff6ff;
-    border-color: var(--color-remax-blue, #003da5);
-    color: var(--color-remax-blue, #003da5);
+    background-color: #fff1f2;
+    border-color: var(--color-remax-red, #dc1c2e);
+    color: var(--color-remax-red, #dc1c2e);
   }
 
   @keyframes locate-pulse {
@@ -527,7 +530,7 @@ const mapPayload = projectsWithLocation.map((p) => {
     50% { transform: scale(1.12); }
   }
 
-  /* Indicador de posición del usuario en el mapa */
+  /* Indicador de posición del usuario en el mapa (Rojo Corporativo) */
   :global(.user-location-marker) {
     position: relative;
     width: 22px;
@@ -539,7 +542,7 @@ const mapPayload = projectsWithLocation.map((p) => {
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background-color: rgba(0, 61, 165, 0.3);
+    background-color: rgba(220, 28, 46, 0.35);
     animation: user-radar 2s infinite ease-out;
   }
 
@@ -550,9 +553,9 @@ const mapPayload = projectsWithLocation.map((p) => {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background-color: var(--color-remax-blue, #003da5);
+    background-color: var(--color-remax-red, #dc1c2e);
     border: 2px solid #ffffff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
   }
 
   @keyframes user-radar {
@@ -834,9 +837,16 @@ const mapPayload = projectsWithLocation.map((p) => {
       display: inline;
     }
 
+    :global(.leaflet-bottom.leaflet-right) {
+      margin-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      margin-right: 10px;
+    }
+
     .btn-map-locate {
-      bottom: 74px;
+      bottom: calc(105px + env(safe-area-inset-bottom, 0px));
       right: 10px;
+      width: 40px;
+      height: 40px;
     }
   }
 </style>

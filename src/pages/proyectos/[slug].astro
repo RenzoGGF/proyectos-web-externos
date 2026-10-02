@@ -465,6 +465,14 @@ const iframeMapUrl = `https://maps.google.com/maps?q=${queryMapa}&t=&z=16&ie=UTF
             referrerpolicy="no-referrer-when-downgrade"
             allowfullscreen
           ></iframe>
+          <a 
+            href={`https://maps.google.com/maps?q=${queryMapa}`} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="map-click-shield"
+            title={`Abrir ubicación de ${project.nombre} en Google Maps`}
+            aria-label={`Abrir ubicación de ${project.nombre} en Google Maps`}
+          ></a>
         </div>
       </section>
     </article>
